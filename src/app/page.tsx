@@ -1,5 +1,5 @@
 'use client';
-import { signInWithSpotify } from '@/lib/client';
+import { signIn } from '@/lib/client';
 
 export default function Home() {
   return (
@@ -7,7 +7,7 @@ export default function Home() {
       <h1 className="text-4xl font-bold mb-4">Chromify</h1>
       <button
         className="bg-green-500 text-white px-6 py-3 rounded-lg cursor-pointer"
-        onClick={signInWithSpotify}
+        onClick={signIn}
       >
         Sign in with Spotify
       </button>
