@@ -1,15 +1,12 @@
 import { createAuthClient } from 'better-auth/react';
 
-export const authClient = createAuthClient();
+export const authClient = createAuthClient({
+  baseURL: "http://127.0.0.1:3000"
+});
 
-export const signInWithSpotify = async () => {
-  try {
-    const data = await authClient.signIn.social({
-      provider: 'spotify',
-      // redirectUrl: window.location.origin,
-    });
-    console.log('Redirecting to Spotify for login...');
-  } catch (err) {
-    console.error('Spotify sign-in failed', err);
-  }
+export const signInWithSpotify = () => {
+  authClient.signIn.social({
+    provider: "spotify",
+    callbackURL: "http://127.0.0.1:3000/api/auth/callback/spotify",
+  });
 };
