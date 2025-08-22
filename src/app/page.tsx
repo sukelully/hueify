@@ -1,15 +1,21 @@
 'use client';
-import { signIn } from '@/lib/client';
+import { signIn } from '@/lib/auth-client';
+import Image from 'next/image';
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <h1 className="text-4xl font-bold mb-4">Hueify</h1>
+    <div className="flex flex-col items-center justify-center min-h-screen sm:px-16 px-4">
       <button
-        className="bg-green-500 text-white px-6 py-3 rounded-lg cursor-pointer"
         onClick={signIn}
+        className="sign-in-btn flex items-center gap-2 sm:gap-3 sm:text-lg text-md min-w-[180px] px-6 py-3"
       >
-        Sign in with Spotify
+        <Image
+          src="/spotify/spotify-black.png"
+          alt="Spotify logo"
+          width={24}
+          height={24}
+        />
+        <span>Sign in with Spotify</span>
       </button>
     </div>
   );

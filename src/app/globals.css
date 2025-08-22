@@ -1,13 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #fdfdfd;
   --foreground: #171717;
+  --primary: #1ed661;
+  --primary-foreground: #0a0a0a;
+  --primary-hover: #3feb7a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -16,6 +22,9 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --primary: #1ed661;
+    --primary-foreground: #0a0a0a;
+    --primary-hover: #3feb7a;
   }
 }
 
@@ -23,4 +32,8 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.sign-in-btn {
+  @apply bg-primary font-bold rounded-lg cursor-pointer hover:bg-primary-hover duration-200 transition-colors;
 }
