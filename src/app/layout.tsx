@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Chromify",
+  title: "Hueify",
   description: "Sort Spotify playlists by color",
 };
 
