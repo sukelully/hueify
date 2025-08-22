@@ -7,7 +7,7 @@ export default function Home() {
     <div className="flex flex-col items-center justify-center min-h-screen sm:px-16 px-4">
       <button
         onClick={signIn}
-        className="sign-in-btn flex items-center gap-2 sm:gap-3 sm:text-lg text-md min-w-[180px] px-6 py-3"
+        className="sign-in-btn text-black hover:bg-primary-hover bg-primary flex items-center gap-2 sm:gap-3 sm:text-lg text-md min-w-[180px] px-6 py-3"
       >
         <Image
           src="/spotify/spotify-black.png"

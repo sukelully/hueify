@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   --background: #fdfdfd;
@@ -26,6 +26,14 @@
     --primary-foreground: #0a0a0a;
     --primary-hover: #3feb7a;
   }
+  
+  .sign-in-btn-border {
+    --border-color: #ffffff;
+  }
+}
+
+.font-corben {
+  font-family: var(--font-corben);
 }
 
 body {
@@ -35,5 +43,5 @@ body {
 }
 
 .sign-in-btn {
-  @apply bg-primary font-bold rounded-lg cursor-pointer hover:bg-primary-hover duration-200 transition-colors;
+  @apply font-bold rounded-lg cursor-pointer duration-200 transition-colors;
 }
