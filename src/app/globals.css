@@ -16,8 +16,8 @@
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-hover: var(--primary-hover);
-  --color-black-active: var(--black-hover);
-  --color-white-active: var(--white-hover);
+  --color-black-active: var(--black-active);
+  --color-white-active: var(--white-active);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
