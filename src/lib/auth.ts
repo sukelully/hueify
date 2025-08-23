@@ -9,9 +9,15 @@ export const auth = betterAuth({
   trustedOrigins: ['http://127.0.0.1:3000'],
   socialProviders: {
     spotify: {
-      clientId: process.env.SPOTIFY_CLIENT_ID!,
-      clientSecret: process.env.SPOTIFY_CLIENT_SECRET!,
+      clientId: process.env.SPOTIFY_CLIENT_ID as string,
+      clientSecret: process.env.SPOTIFY_CLIENT_SECRET as string,
       redirectURI: 'http://127.0.0.1:3000/api/auth/callback/spotify',
+    },
+  },
+  session: {
+    cookieCache: {
+      enable: true,
+      maxAge: 5 * 60,
     },
   },
 });

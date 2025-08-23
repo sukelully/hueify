@@ -6,6 +6,8 @@
   --primary: #1ed661;
   --primary-foreground: #0a0a0a;
   --primary-hover: #3feb7a;
+  --black-hover: #404040;
+  --white-hover: #e5e5e5;
 }
 
 @theme inline {
@@ -14,6 +16,8 @@
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-hover: var(--primary-hover);
+  --color-black-hover: var(--black-hover);
+  --color-white-hover: var(--white-hover);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -26,7 +30,7 @@
     --primary-foreground: #0a0a0a;
     --primary-hover: #3feb7a;
   }
-  
+
   .sign-in-btn-border {
     --border-color: #ffffff;
   }
@@ -43,5 +47,15 @@ body {
 }
 
 .sign-in-btn {
-  @apply font-bold rounded-lg cursor-pointer duration-200 transition-colors;
+  @apply cursor-pointer rounded-lg font-bold transition-colors duration-300;
+}
+
+.sign-in-btn img {
+  content: url('/spotify/spotify-green.png');
+}
+
+@media (prefers-color-scheme: dark) {
+  .sign-in-btn img {
+    content: url('/spotify/spotify-black.png');
+  }
 }
