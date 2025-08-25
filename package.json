@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -H 127.0.0.1",
+    "dev:v": "vercel dev --listen 127.0.0.1:3000",
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
