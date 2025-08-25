@@ -2,21 +2,13 @@
 
 import { authClient } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
+import { signOut } from '@/lib/auth-client';
+import SignInBtn from '../components/misc/SignInBtn';
 
 export default function Dashboard() {
   // access the session atom
   const { data: session, isPending, error, refetch } = authClient.useSession();
   const router = useRouter();
-
-  const handleSignOut = async () => {
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.push('/');
-        },
-      },
-    });
-  };
 
   // Show loading state
   if (isPending) {
@@ -42,14 +34,7 @@ export default function Dashboard() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4">
         <p className="text-xl">You are not signed in.</p>
-        <button
-          className="rounded-lg bg-green-500 px-6 py-2 text-white hover:bg-green-600"
-          onClick={() =>
-            authClient.signIn.social({ provider: 'spotify', callbackURL: '/dashboard' })
-          }
-        >
-          Sign in with Spotify
-        </button>
+        <SignInBtn />
       </div>
     );
   }
@@ -67,7 +52,7 @@ export default function Dashboard() {
       <div className="mt-4 flex gap-4">
         <button
           className="rounded-lg bg-red-500 px-6 py-2 text-white hover:bg-red-600"
-          onClick={handleSignOut}
+          onClick={() => signOut(router)}
         >
           Sign Out
         </button>
