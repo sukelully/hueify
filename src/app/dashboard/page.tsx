@@ -5,7 +5,8 @@ import { authClient } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
 import { signOut } from '@/lib/auth-client';
 import SignInBtn from '@/app/components/misc/SignInBtn';
-import { userAc } from 'better-auth/plugins/admin/access';
+import Image from 'next/image';
+import PlaylistCard from '../components/Dashboard/PlaylistCard';
 
 export default function Dashboard() {
   const { data: session, isPending, error, refetch } = authClient.useSession();
@@ -165,10 +166,7 @@ export default function Dashboard() {
         {userPlaylists && (
           <ul className="space-y-2">
             {userPlaylists.map((pl: any) => (
-              <li key={pl.id}>
-                <p className="font-semibold">{pl.name}</p>
-                <p className="text-gray-600">{pl.tracks.total} tracks</p>
-              </li>
+              <PlaylistCard key={pl.id} playlist={pl} />
             ))}
           </ul>
         )}

@@ -32,7 +32,7 @@ export default function HeaderDropdown() {
         <div ref={dropdownRef} className="relative">
           <button
             onClick={() => setDropdownOpen((prev) => !prev)}
-            className="flex items-center justify-center cursor-pointer focus:outline-none"
+            className="flex cursor-pointer items-center justify-center focus:outline-none"
           >
             {session.user?.image ? (
               <Image
@@ -43,7 +43,7 @@ export default function HeaderDropdown() {
                 height={38}
               />
             ) : (
-              <div className="bg-primary-foreground rounded-full p-1 flex items-center justify-center">
+              <div className="bg-primary-foreground flex items-center justify-center rounded-full p-1">
                 <Image
                   src="/header/user-icon.svg"
                   className="rounded-full"
@@ -56,12 +56,12 @@ export default function HeaderDropdown() {
           </button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-black rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 overflow-hidden animate-fade-in">
+            <div className="animate-fade-in absolute right-0 z-50 mt-2 w-48 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-black">
               <ul className="flex flex-col">
                 <li>
                   <Link
                     href="/dashboard"
-                    className="block px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    className="block px-4 py-2 text-gray-800 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
                     onClick={() => setDropdownOpen(false)}
                   >
                     Dashboard
@@ -73,7 +73,7 @@ export default function HeaderDropdown() {
                 <li>
                   <button
                     onClick={handleSignOut}
-                    className="w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                    className="w-full cursor-pointer px-4 py-2 text-left text-gray-800 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
                   >
                     Sign out
                   </button>
@@ -84,7 +84,7 @@ export default function HeaderDropdown() {
         </div>
       ) : (
         <button
-          className="sign-in-btn cursor-pointer rounded-lg bg-black dark:bg-white text-white dark:text-black px-4 py-2 font-semibold hover:bg-black/80 dark:hover:bg-white/80 transition"
+          className="sign-in-btn cursor-pointer rounded-lg bg-black px-4 py-2 font-semibold text-white transition hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80"
           onClick={signIn}
         >
           Sign in
