@@ -8,6 +8,12 @@
   --primary-hover: #3feb7a;
   --black-active: #404040;
   --white-active: #e5e5e5;
+  --grad-1: #2563eb;
+  --grad-2: #d83af0;
+  --grad-3: #f43f5e;
+  --grad-1-dark: #4479eb;
+  --grad-2-dark: #e490f1;
+  --grad-3-dark: #f4637c;
 }
 
 @theme inline {
@@ -18,6 +24,12 @@
   --color-primary-hover: var(--primary-hover);
   --color-black-active: var(--black-active);
   --color-white-active: var(--white-active);
+  --color-grad-1: var(--grad-1);
+  --color-grad-2: var(--grad-2);
+  --color-grad-3: var(--grad-3);
+  --color-grad-1-dark: var(--grad-1-dark);
+  --color-grad-2-dark: var(--grad-2-dark);
+  --color-grad-3-dark: var(--grad-3-dark);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -37,7 +49,7 @@
 }
 
 .font-corben {
-  font-family: var(--font-corben);
+  font-family: var(--font-corben), serif;
 }
 
 body {
@@ -51,7 +63,7 @@ body {
 }
 
 .sign-in-btn img {
-  content: url('/spotify/spotify-green.png');
+  content: url('/spotify/spotify-white.png');
 }
 
 @media (prefers-color-scheme: dark) {
