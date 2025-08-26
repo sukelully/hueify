@@ -1,6 +1,11 @@
 import Image from 'next/image';
+import { SimplifiedPlaylistObject } from '@/app/types/playlistResponse';
 
-export default function PlaylistCard({ playlist }: any) {
+interface PlaylistCardProps {
+  playlist: SimplifiedPlaylistObject;
+}
+
+export default function PlaylistCard({ playlist }: PlaylistCardProps) {
   return (
     <li className="flex cursor-pointer items-center rounded-lg bg-gray-200 transition-colors duration-200 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-600">
       <div className="relative h-24 w-24 flex-shrink-0">

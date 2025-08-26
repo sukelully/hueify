@@ -1,14 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-interface SpotifyPlaylistsResponse {
-  href: string;
-  limit: number;
-  next: string | null;
-  offset: number;
-  previous: string | null;
-  total: number;
-  items: any[]; // Type more specifically
-}
+import { SpotifyPlaylistsResponse } from '@/app/types/playlistResponse';
 
 export async function GET(req: NextRequest) {
   // Get user token from request

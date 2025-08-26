@@ -9,7 +9,7 @@ interface SpotifyTokenResponse {
 let cachedToken: string | null = null;
 let tokenExpiry: number | null = null;
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const now = Date.now();
 
   if (cachedToken && tokenExpiry && now < tokenExpiry) {

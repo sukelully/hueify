@@ -5,8 +5,8 @@ import { authClient } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
 import { signOut } from '@/lib/auth-client';
 import SignInBtn from '@/app/components/misc/SignInBtn';
-import Image from 'next/image';
-import PlaylistCard from '../components/Dashboard/PlaylistCard';
+import PlaylistCard from '@/app/components/Dashboard/PlaylistCard';
+import { SimplifiedPlaylistObject } from '../types/playlistResponse';
 
 export default function Dashboard() {
   const { data: session, isPending, error, refetch } = authClient.useSession();
@@ -20,7 +20,7 @@ export default function Dashboard() {
   const [userTokenLoading, setUserTokenLoading] = useState(false);
   const [userTokenError, setUserTokenError] = useState<Error | null>(null);
 
-  const [userPlaylists, setUserPlaylists] = useState<any[] | null>(null);
+  const [userPlaylists, setUserPlaylists] = useState<SimplifiedPlaylistObject[] | null>(null);
   const [playlistsLoading, setPlaylistsLoading] = useState(false);
   const [playlistsError, setPlaylistsError] = useState<Error | null>(null);
 
@@ -165,7 +165,7 @@ export default function Dashboard() {
         {playlistsError && <p className="text-red-500">{playlistsError.message}</p>}
         {userPlaylists && (
           <ul className="space-y-2">
-            {userPlaylists.map((pl: any) => (
+            {userPlaylists.map((pl: SimplifiedPlaylistObject) => (
               <PlaylistCard key={pl.id} playlist={pl} />
             ))}
           </ul>
