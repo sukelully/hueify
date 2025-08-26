@@ -4,7 +4,11 @@ import { useState, useEffect } from 'react';
 import { authClient } from '@/lib/auth-client';
 import { SimplifiedPlaylistObject } from '@/app/types/playlistResponse';
 
-export function useSpotifyData(session: any) {
+type Session = typeof authClient extends { useSession: () => { data: infer S } }
+  ? S
+  : unknown;
+
+export function useSpotifyData(session: Session) {
   const [spotifyToken, setSpotifyToken] = useState<string | null>(null);
   const [spotifyTokenLoading, setSpotifyTokenLoading] = useState(false);
   const [spotifyTokenError, setSpotifyTokenError] = useState<Error | null>(null);
