@@ -13,8 +13,8 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'image-cdn-ak.spotifycdn.com',
-      },
+        hostname: '**.spotifycdn.com',
+      }
     ],
   },
   // allowedDevOrigins: ['http://127.0.0.1:3000']
