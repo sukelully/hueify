@@ -1,15 +1,12 @@
 'use client';
 
 import { authClient } from '@/lib/auth-client';
-import { useRouter } from 'next/navigation';
-import { signOut } from '@/lib/auth-client';
 import SignInBtn from '@/app/components/misc/SignInBtn';
 import PlaylistCard from '@/app/components/Dashboard/PlaylistCard';
 import { useSpotifyData } from '@/app/hooks/useSpotifyData';
 
 export default function Dashboard() {
   const { data: session, isPending, error, refetch } = authClient.useSession();
-  const router = useRouter();
   const { userPlaylists, playlistsLoading, playlistsError } = useSpotifyData(session);
 
   if (isPending || playlistsLoading || !userPlaylists) return <LoadingScreen />;
@@ -19,7 +16,7 @@ export default function Dashboard() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-start gap-6 p-8 pt-20 sm:p-20">
       <h1 className="font-corben mb-2 text-4xl font-bold">Hello, {session.user.name}.</h1>
-      <p className="text-secondary-text">Let's get started.</p>
+      <p className="text-secondary-text">Let&apos;s get started.</p>
 
       <div className="mt-4 flex gap-4">
         <button
