@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: '**.spotifycdn.com',
-      }
+      },
     ],
   },
   // allowedDevOrigins: ['http://127.0.0.1:3000']
