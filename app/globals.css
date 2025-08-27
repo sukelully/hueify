@@ -47,6 +47,8 @@
     --primary-hover: #3feb7a;
     --secondary-text: #a1a1a1;
     --header-grad: #0a0a0a;
+    --white-active: #404040;
+    --black-active: ##e5e5e5;
   }
 }
 
@@ -57,7 +59,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Geist', Arial, Helvetica, sans-serif;
+  font-family: 'Geist', Helvetica, Arial, sans-serif;
 }
 
 .btn {
@@ -69,11 +71,11 @@ body {
 }
 
 .desktop-header-item {
-  @apply text-secondary-text hover:text-foreground rounded-full px-2 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-neutral-800;
+  @apply text-secondary-text hover:text-foreground rounded-full px-2 py-1 duration-300 hover:bg-white-active;
 }
 
 .header-dropdown-item {
-  @apply block w-full cursor-pointer px-4 py-2 text-left text-gray-800 transition-colors hover:bg-gray-100 active:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800 dark:active:bg-gray-800;
+  @apply block w-full cursor-pointer px-4 py-2 text-left text-gray-800 hover:bg-neutral-100 active:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-800 dark:active:bg-neutral-800 hover:text-foreground duration-300;
 }
 
 @media (prefers-color-scheme: dark) {

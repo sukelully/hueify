@@ -81,7 +81,7 @@ export default function HeaderDropdown() {
         </div>
       ) : (
         <button
-          className="btn hover:bg-black-active active:bg-black-active dark:active:bg-white-active dark:hover:bg-white-active cursor-pointer rounded-lg bg-black px-4 py-2 font-semibold text-white transition dark:bg-white dark:text-black"
+          className="btn hover:bg-black-active active:bg-black-active cursor-pointer rounded-lg bg-black px-4 py-2 font-semibold text-white transition dark:bg-white dark:text-black"
           onClick={signIn}
         >
           Sign in

@@ -14,7 +14,7 @@ export default function Header() {
       </Link>
 
       <nav className="flex items-center gap-4 space-x-6">
-        <Link href="/faq" className="desktop-header-item hidden md:block">
+        <Link href="/about" className="desktop-header-item hidden md:block">
           About
         </Link>
         <HeaderDropdown />
