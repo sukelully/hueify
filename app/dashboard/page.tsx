@@ -20,10 +20,21 @@ export default function Dashboard() {
         Hello, {session.user.name.trim().split(' ')[0]}.
       </h1>
       <p className="text-secondary-text">Choose a playlist to get started.</p>
-
       <div className="mt-6 w-full max-w-5xl">
+        {/* Error */}
+        {playlistsError && <p className="text-red-500">{playlistsError.message}</p>}
+
+        {/* Playlists Grid */}
+        {userPlaylists && (
+          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-4">
+            {userPlaylists.map((pl) => (
+              <PlaylistCard key={pl.id} playlist={pl} />
+            ))}
+          </ul>
+        )}
+
         {/* Controls Row */}
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mt-4 flex items-center justify-between">
           {/* Left arrow */}
           <button className="hover:bg-white-active active:bg-white-active cursor-pointer rounded-lg p-2 duration-300">
             <svg
@@ -43,14 +54,19 @@ export default function Dashboard() {
             onClick={() => refetch()}
             className="hover:bg-white-active active:bg-white-active cursor-pointer rounded-lg p-2 duration-300"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className='w-6 h-6 text-foreground' fill='currentColor'>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              className="text-foreground h-6 w-6"
+              fill="currentColor"
+            >
               <path d="M 7.59375 3 L 9.0625 5 L 13 5 C 16.324219 5 19 7.675781 19 11 L 19 15 L 16 15 L 20 20.46875 L 24 15 L 21 15 L 21 11 C 21 6.59375 17.40625 3 13 3 Z M 4 3.53125 L 0 9 L 3 9 L 3 13 C 3 17.40625 6.59375 21 11 21 L 16.40625 21 L 14.9375 19 L 11 19 C 7.675781 19 5 16.324219 5 13 L 5 9 L 8 9 Z" />
             </svg>
           </button>
 
           {/* Right arrow */}
           <button className="hover:bg-white-active active:bg-white-active cursor-pointer rounded-lg p-2 duration-300">
-          <svg
+            <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
               height="24"
@@ -62,18 +78,6 @@ export default function Dashboard() {
             </svg>
           </button>
         </div>
-
-        {/* Error */}
-        {playlistsError && <p className="text-red-500">{playlistsError.message}</p>}
-
-        {/* Playlists Grid */}
-        {userPlaylists && (
-          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
-            {userPlaylists.map((pl) => (
-              <PlaylistCard key={pl.id} playlist={pl} />
-            ))}
-          </ul>
-        )}
       </div>
     </div>
   );
