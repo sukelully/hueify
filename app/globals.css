@@ -48,10 +48,6 @@
     --secondary-text: #a1a1a1;
     --header-grad: #0a0a0a;
   }
-
-  .sign-in-btn-border {
-    --border-color: #ffffff;
-  }
 }
 
 .font-corben {
@@ -64,12 +60,20 @@ body {
   font-family: 'Geist', Arial, Helvetica, sans-serif;
 }
 
-.sign-in-btn {
-  @apply cursor-pointer rounded-lg font-bold transition-colors duration-300;
+.btn {
+  @apply cursor-pointer font-bold transition-colors duration-300;
 }
 
 .sign-in-btn img {
   content: url('/spotify/spotify-green.png');
+}
+
+.desktop-header-item {
+  @apply text-secondary-text hover:text-foreground rounded-full px-2 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-neutral-800;
+}
+
+.header-dropdown-item {
+  @apply w-full cursor-pointer px-4 py-2 text-left text-gray-800 transition-colors hover:bg-gray-100 active:bg-gray-100 dark:active:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-800
 }
 
 @media (prefers-color-scheme: dark) {

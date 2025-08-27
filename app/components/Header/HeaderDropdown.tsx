@@ -61,7 +61,7 @@ export default function HeaderDropdown() {
                 <li>
                   <Link
                     href="/dashboard"
-                    className="block px-4 py-2 text-gray-800 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+                    className="header-dropdown-item"
                     onClick={() => setDropdownOpen(false)}
                   >
                     Dashboard
@@ -73,7 +73,7 @@ export default function HeaderDropdown() {
                 <li>
                   <button
                     onClick={handleSignOut}
-                    className="w-full cursor-pointer px-4 py-2 text-left text-gray-800 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+                    className="header-dropdown-item"
                   >
                     Sign out
                   </button>
@@ -84,7 +84,7 @@ export default function HeaderDropdown() {
         </div>
       ) : (
         <button
-          className="sign-in-btn cursor-pointer rounded-lg bg-black px-4 py-2 font-semibold text-white transition hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80"
+          className="btn cursor-pointer rounded-lg bg-black px-4 py-2 font-semibold text-white transition hover:bg-black-active active:bg-black-active dark:active:bg-white-active dark:bg-white dark:text-black dark:hover:bg-white-active"
           onClick={signIn}
         >
           Sign in

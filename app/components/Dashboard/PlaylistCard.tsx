@@ -13,6 +13,7 @@ export default function PlaylistCard({ playlist }: PlaylistCardProps) {
           src={playlist.images?.[0]?.url ?? '/spotify/spotify-green.png'}
           alt={`${playlist.name} cover`}
           fill
+          sizes="(width: 100%)"
           className="rounded-md object-cover"
         />
       </div>
