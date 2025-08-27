@@ -73,7 +73,7 @@ body {
 }
 
 .header-dropdown-item {
-  @apply w-full cursor-pointer px-4 py-2 text-left text-gray-800 transition-colors hover:bg-gray-100 active:bg-gray-100 dark:active:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-800
+  @apply block w-full cursor-pointer px-4 py-2 text-left text-gray-800 transition-colors hover:bg-gray-100 active:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800 dark:active:bg-gray-800;
 }
 
 @media (prefers-color-scheme: dark) {

@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="md:scroll-smooth min-w-[280px]">
+    <html lang="en" className="min-w-[280px] md:scroll-smooth">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${corben.variable} antialiased`}
       >

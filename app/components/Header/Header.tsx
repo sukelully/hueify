@@ -13,20 +13,12 @@ export default function Header() {
         <div className="from-grad-1 via-grad-2 to-grad-3 relative top-[3px] -z-10 h-[3px] rounded-lg bg-gradient-to-r"></div>
       </Link>
 
-      {/* Desktop menu */}
-      <nav className="hidden items-center gap-4 space-x-6 md:flex">
-        <Link href="/faq" className="desktop-header-item">
+      <nav className="flex items-center gap-4 space-x-6">
+        <Link href="/faq" className="desktop-header-item hidden md:block">
           About
         </Link>
         <HeaderDropdown />
       </nav>
-
-      {/* Mobile menu button */}
-      <button className="group rounded p-2 hover:bg-white-active active:bg-white-active duration-300 md:hidden">
-        <span className="mb-1 block h-0.5 w-6 bg-secondary-text group-hover:bg-foreground group-active:bg-foreground duration-300"></span>
-        <span className="mb-1 block h-0.5 w-6 bg-secondary-text group-hover:bg-foreground group-active:bg-foreground duration-300"></span>
-        <span className="block h-0.5 w-6 bg-secondary-text group-hover:bg-foreground group-active:bg-foreground duration-300"></span>
-      </button>
     </header>
   );
 }

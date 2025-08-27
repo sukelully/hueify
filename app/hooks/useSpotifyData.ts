@@ -4,81 +4,50 @@ import { useState, useEffect } from 'react';
 import { authClient } from '@/lib/auth-client';
 import { SimplifiedPlaylistObject } from '@/app/types/playlistResponse';
 
-type Session = typeof authClient extends { useSession: () => { data: infer S } }
-  ? S
-  : unknown;
+type Session = typeof authClient extends { useSession: () => { data: infer S } } ? S : unknown;
 
 export function useSpotifyData(session: Session) {
-  const [spotifyToken, setSpotifyToken] = useState<string | null>(null);
-  const [spotifyTokenLoading, setSpotifyTokenLoading] = useState(false);
-  const [spotifyTokenError, setSpotifyTokenError] = useState<Error | null>(null);
-
-  const [userToken, setUserToken] = useState<string | null>(null);
-  const [userTokenLoading, setUserTokenLoading] = useState(false);
-  const [userTokenError, setUserTokenError] = useState<Error | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [accessTokenLoading, setAccessTokenLoading] = useState(false);
+  const [accessTokenError, setAccessTokenError] = useState<Error | null>(null);
 
   const [userPlaylists, setUserPlaylists] = useState<SimplifiedPlaylistObject[] | null>(null);
   const [playlistsLoading, setPlaylistsLoading] = useState(false);
   const [playlistsError, setPlaylistsError] = useState<Error | null>(null);
 
-  // Fetch Spotify access token
+  // Fetch access token
   useEffect(() => {
-    async function fetchToken() {
+    async function fetchAccessToken() {
       try {
-        setSpotifyTokenLoading(true);
-        setSpotifyTokenError(null);
-
-        const res = await fetch('/api/spotify/token');
-        const data = await res.json();
-        setSpotifyToken(data.access_token);
-      } catch (err) {
-        console.error('Failed to fetch Spotify token:', err);
-        setSpotifyTokenError(
-          err instanceof Error ? err : new Error('Unknown Spotify access token error')
-        );
-      } finally {
-        setSpotifyTokenLoading(false);
-      }
-    }
-
-    fetchToken();
-  }, [session]);
-
-  // Fetch OAuth access token
-  useEffect(() => {
-    async function fetchUsertoken() {
-      try {
-        setUserTokenLoading(true);
-        setUserTokenError(null);
+        setAccessTokenLoading(true);
+        setAccessTokenError(null);
 
         const tokenResponse = await authClient.getAccessToken({
           providerId: 'spotify',
         });
 
         const userAccessToken = tokenResponse.data?.accessToken;
-        if (userAccessToken) setUserToken(userAccessToken);
+        if (userAccessToken) setAccessToken(userAccessToken);
       } catch (err) {
-        console.error('Failed to fetch user acess token', err);
-        setUserTokenError(
-          err instanceof Error ? err : new Error('Unknown user access token error')
-        );
+        console.error('Failed to fetch acess token', err);
+        setAccessTokenError(err instanceof Error ? err : new Error('Unknown access token error'));
       } finally {
-        setUserTokenLoading(false);
+        setAccessTokenLoading(false);
       }
     }
 
-    fetchUsertoken();
+    fetchAccessToken();
   }, [session]);
 
   // User playlists
   useEffect(() => {
-    if (!userToken) return;
+    if (!accessToken) return;
     async function fetchPlaylists() {
       try {
         setPlaylistsLoading(true);
         setPlaylistsError(null);
         const res = await fetch('/api/spotify/playlists', {
-          headers: { Authorization: `Bearer ${userToken}` },
+          headers: { Authorization: `Bearer ${accessToken}` },
         });
         if (!res.ok) throw new Error('Failed to fetch playlists');
         const data = await res.json();
@@ -92,16 +61,12 @@ export function useSpotifyData(session: Session) {
       }
     }
     fetchPlaylists();
-  }, [userToken]);
+  }, [accessToken]);
 
   return {
-    spotifyToken,
-    spotifyTokenLoading,
-    spotifyTokenError,
-
-    userToken,
-    userTokenLoading,
-    userTokenError,
+    accessToken,
+    accessTokenLoading,
+    accessTokenError,
 
     userPlaylists,
     playlistsLoading,
