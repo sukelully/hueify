@@ -1,18 +1,28 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { authClient } from '@/lib/auth-client';
 import SignInBtn from '@/app/components/misc/SignInBtn';
 import PlaylistCard from '@/app/components/Dashboard/PlaylistCard';
 import { useSpotifyData } from '@/app/hooks/useSpotifyData';
-import Image from 'next/image';
 
 export default function Dashboard() {
+  const [playlistsOffset, setPlaylistsOffset] = useState<number>(0);
   const { data: session, isPending, error, refetch } = authClient.useSession();
-  const { userPlaylists, playlistsLoading, playlistsError } = useSpotifyData(session);
+  const { userPlaylists, fetchPlaylists, playlistsLoading, playlistsError } = useSpotifyData(session);
+
+  useEffect(() => {
+    if (session) fetchPlaylists(playlistsOffset);
+  }, [playlistsOffset, session]);
 
   if (isPending || playlistsLoading || !userPlaylists) return <LoadingScreen />;
   if (error) return <ErrorScreen message={error.message} />;
   if (!session) return <SignInScreen />;
+  
+
+  const handleOffsetPlaylists = (offset: number) => {
+    setPlaylistsOffset((prev) => prev + offset);
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-start p-8 pt-20 sm:p-20">
@@ -21,8 +31,9 @@ export default function Dashboard() {
       </h1>
       <p className="text-secondary-text">Choose a playlist to get started.</p>
       <div className="mt-6 w-full max-w-5xl">
-        {/* Error */}
-        {playlistsError && <p className="text-red-500">{playlistsError.message}</p>}
+        {playlistsError && (
+          <p className="text-red-500">Error fetching playlists: {playlistsError.message}</p>
+        )}
 
         {/* Playlists Grid */}
         {userPlaylists && (
@@ -36,7 +47,7 @@ export default function Dashboard() {
         {/* Controls Row */}
         <div className="mt-4 flex items-center justify-between">
           {/* Left arrow */}
-          <button className="hover:bg-white-active active:bg-white-active cursor-pointer rounded-lg p-2 duration-300">
+          <button className={`hover:bg-white-active active:bg-white-active cursor-pointer rounded-lg p-2 duration-300 ${playlistsOffset === 0 ? 'invisible' : ''}`} onClick={() => handleOffsetPlaylists(-20)}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -65,7 +76,7 @@ export default function Dashboard() {
           </button>
 
           {/* Right arrow */}
-          <button className="hover:bg-white-active active:bg-white-active cursor-pointer rounded-lg p-2 duration-300">
+          <button className={`hover:bg-white-active active:bg-white-active cursor-pointer rounded-lg p-2 duration-300 ${userPlaylists.length !== 20 ? 'invisible' : ''}`} onClick={() => handleOffsetPlaylists(20)}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"

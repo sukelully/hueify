@@ -10,8 +10,13 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Fetch playlists from Spotify
-    const response = await fetch('https://api.spotify.com/v1/me/playlists', {
+    // Get search params (limit, offset) from request URL
+    const { searchParams } = new URL(req.url);
+    const limit = searchParams.get('limit') ?? '20';
+    const offset = searchParams.get('offset') ?? 0;
+
+    // Fetch playlists from spotify
+    const response = await fetch(`https://api.spotify.com/v1/me/playlists?limit=${limit}&offset=${offset}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

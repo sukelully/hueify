@@ -15,6 +15,25 @@ export function useSpotifyData(session: Session) {
   const [playlistsLoading, setPlaylistsLoading] = useState(false);
   const [playlistsError, setPlaylistsError] = useState<Error | null>(null);
 
+  async function fetchPlaylists(offset: number = 0, limit: number = 20) {
+    try {
+      setPlaylistsLoading(true);
+      setPlaylistsError(null);
+      const res = await fetch(`/api/spotify/playlists?limit=${limit}&offset=${offset}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!res.ok) throw new Error('Failed to fetch playlists');
+      const data = await res.json();
+      setUserPlaylists(data.items);
+    } catch (err) {
+      setPlaylistsError(
+        err instanceof Error ? err : new Error('Unknown error fetching user playlists')
+      );
+    } finally {
+      setPlaylistsLoading(false);
+    }
+  }
+
   // Fetch access token
   useEffect(() => {
     async function fetchAccessToken() {
@@ -42,24 +61,8 @@ export function useSpotifyData(session: Session) {
   // User playlists
   useEffect(() => {
     if (!accessToken) return;
-    async function fetchPlaylists() {
-      try {
-        setPlaylistsLoading(true);
-        setPlaylistsError(null);
-        const res = await fetch('/api/spotify/playlists', {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (!res.ok) throw new Error('Failed to fetch playlists');
-        const data = await res.json();
-        setUserPlaylists(data.items);
-      } catch (err) {
-        setPlaylistsError(
-          err instanceof Error ? err : new Error('Unknown error fetching user playlists')
-        );
-      } finally {
-        setPlaylistsLoading(false);
-      }
-    }
+
+
     fetchPlaylists();
   }, [accessToken]);
 
@@ -69,6 +72,7 @@ export function useSpotifyData(session: Session) {
     accessTokenError,
 
     userPlaylists,
+    fetchPlaylists,
     playlistsLoading,
     playlistsError,
   };

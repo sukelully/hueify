@@ -7,7 +7,7 @@ interface PlaylistCardProps {
 
 export default function PlaylistCard({ playlist }: PlaylistCardProps) {
   return (
-    <li className="flex flex-col cursor-pointer rounded-lg bg-gray-200 transition-colors duration-200 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-600 overflow-hidden">
+    <li className="flex flex-col cursor-pointer rounded-lg bg-gray-200 transition-colors duration-200 hover:bg-gray-300 active:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-600 dark:active:bg-slate-600 overflow-hidden">
       {/* Album cover */}
       <div className="relative w-full aspect-square flex-shrink-0">
         <Image
