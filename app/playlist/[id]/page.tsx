@@ -1,7 +1,8 @@
 import PlaylistClient from "./PlaylistClient";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { getPlaylistTracks } from "@/app/actions/spotify";
+import { getPlaylistTracks } from "@/app/actions/spotifyClient";
+import SignInScreen from "@/app/components/misc/SignInScreen";
 
 export default async function PlaylistPage({ params }: { params: { id: string } }) {
   const { id } = await params;
@@ -10,10 +11,8 @@ export default async function PlaylistPage({ params }: { params: { id: string } 
     headers: await headers(),
   });
 
-  if (!session) {
-    return <p>You must be signed in to view this playlist.</p>;
-  }
-
+  if (!session) return <SignInScreen />
+  
   const tracks = await getPlaylistTracks(id);
   console.log("Tracks:", tracks); // or JSON.stringify(tracks, null, 2)
 

@@ -1,7 +1,5 @@
 'use client';
 
-import SignInScreen from '@/app/components/misc/SignInScreen';
-
 type PlaylistClientProps = {
   id: string;
   tracks: any[];

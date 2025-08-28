@@ -3,7 +3,7 @@
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 
-async function getAccessToken(): Promise<string> {
+export async function getAccessToken(): Promise<string> {
   const tokenResponse = await auth.api.getAccessToken({
     body: { providerId: "spotify" },
     headers: await headers()

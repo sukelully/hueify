@@ -58,7 +58,7 @@ export function useSpotifyData(session: Session, offset: number, limit: number) 
     fetchAccessToken();
   }, [session]);
 
-  // User playlists
+  // Fetch playlists
   useEffect(() => {
     if (!accessToken) return;
 
