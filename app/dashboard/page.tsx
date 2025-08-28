@@ -16,7 +16,7 @@ export default function Dashboard() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-start p-8 pt-20 sm:p-20">
-      <h1 className="font-corben mb-4 text-4xl font-bold">
+      <h1 className="font-corben mb-4 text-3xl font-bold">
         Hello, {session.user.name.trim().split(' ')[0]}.
       </h1>
       <p className="text-secondary-text">Choose a playlist to get started.</p>
