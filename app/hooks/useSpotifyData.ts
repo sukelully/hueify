@@ -6,7 +6,7 @@ import { SimplifiedPlaylistObject } from '@/app/types/playlistResponse';
 
 type Session = typeof authClient extends { useSession: () => { data: infer S } } ? S : unknown;
 
-export function useSpotifyData(session: Session) {
+export function useSpotifyData(session: Session, offset: number, limit: number) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [accessTokenLoading, setAccessTokenLoading] = useState(false);
   const [accessTokenError, setAccessTokenError] = useState<Error | null>(null);
@@ -15,11 +15,11 @@ export function useSpotifyData(session: Session) {
   const [playlistsLoading, setPlaylistsLoading] = useState(false);
   const [playlistsError, setPlaylistsError] = useState<Error | null>(null);
 
-  async function fetchPlaylists(offset: number = 0, limit: number = 20) {
+  async function fetchPlaylists(offset: number, limit: number) {
     try {
       setPlaylistsLoading(true);
       setPlaylistsError(null);
-      const res = await fetch(`/api/spotify/playlists?limit=${limit}&offset=${offset}`, {
+      const res = await fetch(`/api/spotify/playlists?offset=${offset}&limit=${limit}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       if (!res.ok) throw new Error('Failed to fetch playlists');
@@ -62,18 +62,14 @@ export function useSpotifyData(session: Session) {
   useEffect(() => {
     if (!accessToken) return;
 
-
-    fetchPlaylists();
-  }, [accessToken]);
+    fetchPlaylists(offset, limit);
+  }, [accessToken, offset, limit]);
 
   return {
-    accessToken,
-    accessTokenLoading,
-    accessTokenError,
-
     userPlaylists,
-    fetchPlaylists,
     playlistsLoading,
     playlistsError,
+
+    accessTokenError
   };
 }
