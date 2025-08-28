@@ -1,111 +1,38 @@
-'use client';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
+import { getUserPlaylists } from '@/app/actions/spotifyClient';
+import SignInScreen from '@/app/components/misc/SignInScreen';
+import PlaylistCard from './PlaylistCard';
+import { SimplifiedPlaylistObject } from '@/app/types/playlistResponse';
+import PlaylistsGrid from './PlaylistsGrid';
 
-import { authClient } from '@/lib/auth-client';
-import SignInBtn from '@/app/components/misc/SignInBtn';
-import PlaylistCard from '@/app/components/Dashboard/PlaylistCard';
-import { useSpotifyData } from '@/app/hooks/useSpotifyData';
-import Image from 'next/image';
 
-export default function Dashboard() {
-  const { data: session, isPending, error, refetch } = authClient.useSession();
-  const { userPlaylists, playlistsLoading, playlistsError } = useSpotifyData(session);
+export default async function Dashboard() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-  if (isPending || playlistsLoading || !userPlaylists) return <LoadingScreen />;
-  if (error) return <ErrorScreen message={error.message} />;
   if (!session) return <SignInScreen />;
+  
+  // Fetch playlists
+  let playlists: SimplifiedPlaylistObject[] = [];
+  try {
+    playlists = await getUserPlaylists();
+  } catch (error) {
+    console.error(error);
+    return <ErrorScreen />;
+  }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-start p-8 pt-20 sm:p-20">
-      <h1 className="font-corben mb-4 text-3xl font-bold">
-        Hello, {session.user.name.trim().split(' ')[0]}.
-      </h1>
-      <p className="text-secondary-text">Choose a playlist to get started.</p>
-      <div className="mt-6 w-full max-w-5xl">
-        {/* Error */}
-        {playlistsError && <p className="text-red-500">{playlistsError.message}</p>}
-
-        {/* Playlists Grid */}
-        {userPlaylists && (
-          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-4">
-            {userPlaylists.map((pl) => (
-              <PlaylistCard key={pl.id} playlist={pl} />
-            ))}
-          </ul>
-        )}
-
-        {/* Controls Row */}
-        <div className="mt-4 flex items-center justify-between">
-          {/* Left arrow */}
-          <button className="hover:bg-white-active active:bg-white-active cursor-pointer rounded-lg p-2 duration-300">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              className="text-foreground h-6 w-6 rotate-180"
-              fill="currentColor"
-            >
-              <polygon points="7.293 4.707 14.586 12 7.293 19.293 8.707 20.707 17.414 12 8.707 3.293 7.293 4.707" />
-            </svg>
-          </button>
-
-          {/* Refresh button */}
-          <button
-            onClick={() => refetch()}
-            className="hover:bg-white-active active:bg-white-active cursor-pointer rounded-lg p-2 duration-300"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              className="text-foreground h-6 w-6"
-              fill="currentColor"
-            >
-              <path d="M 7.59375 3 L 9.0625 5 L 13 5 C 16.324219 5 19 7.675781 19 11 L 19 15 L 16 15 L 20 20.46875 L 24 15 L 21 15 L 21 11 C 21 6.59375 17.40625 3 13 3 Z M 4 3.53125 L 0 9 L 3 9 L 3 13 C 3 17.40625 6.59375 21 11 21 L 16.40625 21 L 14.9375 19 L 11 19 C 7.675781 19 5 16.324219 5 13 L 5 9 L 8 9 Z" />
-            </svg>
-          </button>
-
-          {/* Right arrow */}
-          <button className="hover:bg-white-active active:bg-white-active cursor-pointer rounded-lg p-2 duration-300">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              className="text-foreground h-6 w-6"
-              fill="currentColor"
-            >
-              <polygon points="7.293 4.707 14.586 12 7.293 19.293 8.707 20.707 17.414 12 8.707 3.293 7.293 4.707" />
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
+    <PlaylistsGrid initialPlaylists={playlists} session={session}/>
   );
 }
 
-// Helper components
-function LoadingScreen() {
+function ErrorScreen() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-      <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-black dark:border-gray-600 dark:border-t-white"></div>
-      <p className="text-secondary-text text-xl">Loading playlists</p>
-    </div>
-  );
-}
-
-function ErrorScreen({ message }: { message: string }) {
-  return (
-    <div className="flex min-h-screen items-center justify-center">
-      <p className="cursor-pointer text-red-500">Error: {message}</p>
-    </div>
-  );
-}
-
-function SignInScreen() {
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-      <p className="text-xl">You are not signed in.</p>
-      <SignInBtn />
+      <h1 className="font-corben mb-4 text-3xl font-bold">Oops.</h1>
+      <p className="text-secondary-text">Something went wrong.</p>
     </div>
   );
 }
