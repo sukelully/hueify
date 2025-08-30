@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import SignInBtn from './components/misc/SignInBtn';
+import SignInBtn from '@/components/misc/SignInBtn';
 import { authClient } from '@/lib/auth-client';
 
 export default function Home() {

@@ -2,9 +2,9 @@
 
 import { useState, useTransition } from 'react';
 import { getUserPlaylists } from '@/app/actions/spotifyClient';
-import { SimplifiedPlaylistObject } from '@/app/types/playlistResponse';
+import { SimplifiedPlaylistObject } from '@/types/playlistResponse';
 import PlaylistCard from './PlaylistCard';
-import SignInScreen from '@/app/components/misc/SignInScreen';
+import SignInScreen from '@/components/misc/SignInScreen';
 
 type Session = {
   user: {
@@ -132,7 +132,6 @@ function LoadingScreen() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4">
       <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-black dark:border-gray-600 dark:border-t-white"></div>
-      {/* <p className="text-secondary-text text-xl">Loading playlists</p> */}
     </div>
   );
 }

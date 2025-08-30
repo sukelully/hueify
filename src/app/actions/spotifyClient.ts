@@ -5,32 +5,33 @@ import { headers } from 'next/headers';
 
 export async function getAccessToken(): Promise<string> {
   const tokenResponse = await auth.api.getAccessToken({
-    body: { providerId: "spotify" },
-    headers: await headers()
+    body: { providerId: 'spotify' },
+    headers: await headers(),
   });
 
   const accessToken = tokenResponse?.accessToken;
-  if (!accessToken) throw new Error("No Spotify access token available");
+  if (!accessToken) throw new Error('No Spotify access token available');
   return accessToken;
 }
 
+// Fetch user's playlists
 export async function getUserPlaylists(offset: number = 0, limit: number = 20) {
   const accessToken = await getAccessToken();
 
   const res = await fetch(
     `https://api.spotify.com/v1/me/playlists?offset=${offset}&limit=${limit}`,
     {
-      headers: { Authorization: `Bearer ${accessToken}` }
+      headers: { Authorization: `Bearer ${accessToken}` },
     }
   );
 
-  if (!res.ok) throw new Error("Failed to fetch Spotify playlists");
+  if (!res.ok) throw new Error('Failed to fetch Spotify playlists');
 
   const data = await res.json();
   return data.items;
 }
 
-// Fetch playlist tracks
+// Fetch specific playlist tracks
 export async function getPlaylistTracks(
   playlistId: string,
   offset: number = 0,
@@ -55,5 +56,5 @@ export async function getPlaylistTracks(
   }
 
   const data = await res.json();
-  return data.items; // array of track objects
+  return data.items;
 }

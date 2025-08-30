@@ -1,10 +1,10 @@
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { getUserPlaylists } from '@/app/actions/spotifyClient';
-import SignInScreen from '@/app/components/misc/SignInScreen';
-import PlaylistCard from './PlaylistCard';
-import { SimplifiedPlaylistObject } from '@/app/types/playlistResponse';
+import SignInScreen from '@/components/misc/SignInScreen';
+import { SimplifiedPlaylistObject } from '@/types/playlistResponse';
 import PlaylistsGrid from './PlaylistsGrid';
+import { redirect } from 'next/navigation';
 
 
 export default async function Dashboard() {
@@ -12,7 +12,7 @@ export default async function Dashboard() {
     headers: await headers(),
   });
 
-  if (!session) return <SignInScreen />;
+  if (!session) redirect("/signin");
   
   // Fetch playlists
   let playlists: SimplifiedPlaylistObject[] = [];

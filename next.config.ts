@@ -17,7 +17,13 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // allowedDevOrigins: ['http://127.0.0.1:3000']
+  experimental: {
+    useCache: true,
+    // serverActions: {
+    //   allowedOrigins: ['http://127.0.0.1:3000', 'https://hueify.vercel.app']
+    // }
+  },
+  // allowedDevOrigins: ['http://127.0.0.1:3000', 'https://hueify.vercel.app']
 };
 
 export default nextConfig;

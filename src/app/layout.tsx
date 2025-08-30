@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { geistSans, geistMono, corben, outfit } from '@/lib/fonts';
-import Header from './components/Header/Header';
+import Header from '@/components/Header/Header';
 import './globals.css';
 
 export const metadata: Metadata = {

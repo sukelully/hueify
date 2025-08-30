@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { signIn, signOut, authClient } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
-import { useClickOutside } from '@/app/hooks/useClickOutside';
+import { useClickOutside } from '@/hooks/useClickOutside';
 import Image from 'next/image';
 import Link from 'next/link';
 

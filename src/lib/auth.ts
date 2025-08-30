@@ -11,7 +11,8 @@ export const auth = betterAuth({
     spotify: {
       clientId: process.env.SPOTIFY_CLIENT_ID as string,
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET as string,
-      redirectURI: 'https://hueify.vercel.app/api/auth/callback/spotify',
+      redirectURI: 'http://127.0.0.1:3000/api/auth/callback/spotify',
+      // redirectURI: 'https://hueify.vercel.app/api/auth/callback/spotify',
     },
   },
   session: {
