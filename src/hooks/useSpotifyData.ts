@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { authClient } from '@/lib/auth-client';
-import { SimplifiedPlaylistObject } from '@/app/types/playlistResponse';
+import { SimplifiedPlaylistObject } from '@/types/playlistResponse';
 
 type Session = typeof authClient extends { useSession: () => { data: infer S } } ? S : unknown;
 

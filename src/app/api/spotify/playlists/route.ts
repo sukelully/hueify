@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { SpotifyPlaylistsResponse } from '@/app/types/playlistResponse';
+import { SpotifyPlaylistsResponse } from '@/types/playlistResponse';
 
 export async function GET(req: NextRequest) {
   // Get user token from request
