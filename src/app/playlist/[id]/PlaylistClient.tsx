@@ -73,13 +73,6 @@ export default function PlaylistClient({ playlist, tracks }: PlaylistClientProps
     processColors();
   }, [uniqueTracks]);
 
-  // Determine number of columns
-  const numTracks = uniqueTracks.length;
-  // let gridColsClass = 'grid-cols-2 md:grid-cols-4 lg:grid-cols-6';
-  // if (numTracks > 20) gridColsClass = 'grid-cols-3 md:grid-cols-6 lg:grid-cols-8';
-  // else if (numTracks > 40) gridColsClass = 'grid-cols-4 md:grid-cols-8 lg:grid-cols-12';
-  let gridColsClass = 'grid-cols-1';
-
   if (!tracks || tracks.length === 0) {
     return (
       <div className="relative min-h-screen p-4">
@@ -106,7 +99,7 @@ export default function PlaylistClient({ playlist, tracks }: PlaylistClientProps
           Hueify playlist
         </button>
 
-        <ul className={`absolute opacity-100 -z-10 top-0 grid w-full gap-4 px-164 ${gridColsClass}`}>
+        <ul className="flex flex-col w-full max-h-[70vh] overflow-y-auto gap-4 px-4 pb-4 scrollbar-thin scrollbar-thumb-gray-400">
           {sortedTracks.map((track) => {
             const src = track.track?.album?.images?.[0]?.url ?? '/spotify/spotify-green.png';
             const title = track.track?.name ?? 'Unknown Track';
@@ -114,14 +107,14 @@ export default function PlaylistClient({ playlist, tracks }: PlaylistClientProps
             return (
               <li
                 key={track.track?.id}
-                className="group relative aspect-square w-full rounded-lg"
+                className="relative aspect-square w-full max-w-[300px] mx-auto rounded-lg"
               >
                 <NextImage
                   src={src}
                   alt={title}
                   fill
-                  sizes="(max-width: 768px) 50vw, 25vw"
-                  className="object-cover"
+                  sizes="300px"
+                  className="object-cover rounded-lg"
                 />
               </li>
             );
