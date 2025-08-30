@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { authClient } from '@/lib/auth-client';
 import PlaylistCard from './PlaylistCard';
-import SignInScreen from '@/app/components/misc/SignInScreen';
-import { useSpotifyData } from '@/app/hooks/useSpotifyData';
+import SignInScreen from '@/components/misc/SignInScreen';
+import { useSpotifyData } from '@/hooks/useSpotifyData';
 
 export default function Dashboard() {
   const [playlistsOffset, setPlaylistsOffset] = useState(0);
