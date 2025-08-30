@@ -5,6 +5,7 @@ import { getUserPlaylists } from '@/app/actions/spotifyClient';
 import { SimplifiedPlaylistObject } from '@/types/playlistResponse';
 import PlaylistCard from './PlaylistCard';
 import SignInScreen from '@/components/misc/SignInScreen';
+import LoadingScreen from '@/components/misc/LoadingScreen';
 
 type Session = {
   user: {
@@ -61,7 +62,7 @@ export default function PlaylistsGrid({
       <p className="text-secondary-text">Choose a playlist to get started.</p>
 
       <div className="mt-6 w-full max-w-5xl">
-        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-4">
+        <ul className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {playlists.map((pl) => (
             <PlaylistCard key={pl.id} playlist={pl} />
           ))}
@@ -124,14 +125,6 @@ function ControlsRow({
           <polygon points="7.293 4.707 14.586 12 7.293 19.293 8.707 20.707 17.414 12 8.707 3.293 7.293 4.707" />
         </svg>
       </button>
-    </div>
-  );
-}
-
-function LoadingScreen() {
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-      <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-black dark:border-gray-600 dark:border-t-white"></div>
     </div>
   );
 }

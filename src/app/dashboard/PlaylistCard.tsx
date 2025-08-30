@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { SimplifiedPlaylistObject } from '@/app/types/playlistResponse';
+import { SimplifiedPlaylistObject } from '@/types/playlistResponse';
 
 interface PlaylistCardProps {
   playlist: SimplifiedPlaylistObject;
@@ -8,9 +8,9 @@ interface PlaylistCardProps {
 
 export default function PlaylistCard({ playlist }: PlaylistCardProps) {
   return (
-    <li className="flex flex-col cursor-pointer rounded-lg bg-gray-200 transition-colors duration-200 hover:bg-gray-300 active:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-600 dark:active:bg-slate-600 overflow-hidden">
+    <li className="flex flex-col cursor-pointer rounded-lg bg-gray-200 hover:scale-105 transition duration-200 hover:bg-gray-300 active:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-600 dark:active:bg-slate-600 overflow-hidden">
       <Link href={`/playlist/${playlist.id}`}>
-        {/* Album cover */}
+
         <div className="relative w-full aspect-square flex-shrink-0">
           <Image
             src={playlist.images?.[0]?.url ?? '/spotify/spotify-green.png'}
@@ -20,7 +20,7 @@ export default function PlaylistCard({ playlist }: PlaylistCardProps) {
             className="object-cover rounded-t-lg"
           />
         </div>
-        {/* Playlist info */}
+
         <div className="flex flex-col justify-center items-center p-4">
           <h3
             className="text-lg md:text-xl font-bold text-center truncate w-full"
