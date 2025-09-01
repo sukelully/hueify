@@ -6,14 +6,13 @@ import { SimplifiedPlaylistObject } from '@/types/playlistResponse';
 import PlaylistsGrid from './PlaylistsGrid';
 import { redirect } from 'next/navigation';
 
-
 export default async function Dashboard() {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
 
-  if (!session) redirect("/signin");
-  
+  if (!session) redirect('/signin');
+
   // Fetch playlists
   let playlists: SimplifiedPlaylistObject[] = [];
   try {
@@ -23,9 +22,7 @@ export default async function Dashboard() {
     return <ErrorScreen />;
   }
 
-  return (
-    <PlaylistsGrid initialPlaylists={playlists} session={session}/>
-  );
+  return <PlaylistsGrid initialPlaylists={playlists} session={session} />;
 }
 
 function ErrorScreen() {

@@ -4,14 +4,12 @@ import { headers } from 'next/headers';
 import { getPlaylist } from '@/app/actions/spotifyClient';
 import { redirect } from 'next/navigation';
 
-
 export default async function PlaylistPage({ params }: { params: { id: string } }) {
   const { id } = await params;
 
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-
 
   if (!session) return redirect('/signin');
 

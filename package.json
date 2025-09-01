@@ -5,11 +5,17 @@
   "scripts": {
     "dev": "next dev --turbopack -H 127.0.0.1",
     "dev:v": "vercel dev --listen 127.0.0.1:3000",
-    "build": "next build --turbopack",
+    "build": "next build",
+    "build:t": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
     "prettier": "prettier . --write",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx}": "eslint --fix",
+    "src/**/*.{js,jsx,ts,tsx,css,scss,md}": "prettier --write --ignore-unknown"
   },
   "dependencies": {
     "@prisma/client": "^6.14.0",
@@ -27,7 +33,10 @@
     "colorthief": "^2.6.0",
     "eslint": "^9",
     "eslint-config-next": "15.5.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.5",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14",
     "prisma": "^6.14.0",

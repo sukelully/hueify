@@ -16,11 +16,14 @@ export async function GET(req: NextRequest) {
     const limit = searchParams.get('limit') ?? '20';
 
     // Fetch playlists from spotify
-    const response = await fetch(`https://api.spotify.com/v1/me/playlists?offset=${offset}&limit=${limit}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await fetch(
+      `https://api.spotify.com/v1/me/playlists?offset=${offset}&limit=${limit}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     if (!response.ok) {
       return NextResponse.json({ error: 'Failed to fetch playlists' }, { status: response.status });

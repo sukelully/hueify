@@ -59,18 +59,14 @@ export async function getPlaylistTracks(
   return data.items;
 }
 
-export async function getPlaylist(
-  playlistId: string
-) {
+export async function getPlaylist(playlistId: string) {
   const accessToken = await getAccessToken();
 
-  const res = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  )
+  const res = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
 
   if (!res.ok) {
     const text = await res.text();

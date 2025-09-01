@@ -70,6 +70,6 @@ export function useSpotifyData(session: Session, offset: number, limit: number) 
     playlistsLoading,
     playlistsError,
 
-    accessTokenError
+    accessTokenError,
   };
 }

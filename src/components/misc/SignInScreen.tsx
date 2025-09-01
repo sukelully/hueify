@@ -1,4 +1,4 @@
-import SignInBtn from "./SignInBtn";
+import SignInBtn from './SignInBtn';
 
 export default function SignInScreen() {
   return (

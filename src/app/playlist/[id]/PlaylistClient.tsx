@@ -91,15 +91,13 @@ export default function PlaylistClient({ playlist, tracks }: PlaylistClientProps
       <DashboardChevron />
 
       <div className="flex flex-col items-center gap-6 pt-24 md:pt-28">
-        <h1 className="font-corben text-3xl font-bold md:text-4xl">
-          {playlist.name}
-        </h1>
+        <h1 className="font-corben text-3xl font-bold md:text-4xl">{playlist.name}</h1>
 
-        <button className="btn bg-foreground text-background px-3 py-2 rounded-full active:bg-black-active hover:bg-black-active duration-300">
+        <button className="btn bg-foreground text-background active:bg-black-active hover:bg-black-active rounded-full px-3 py-2 duration-300">
           Hueify playlist
         </button>
 
-        <ul className="flex flex-col w-full max-h-[70vh] overflow-y-auto gap-4 px-4 pb-4 scrollbar-thin scrollbar-thumb-gray-400">
+        <ul className="scrollbar-thin scrollbar-thumb-gray-400 flex max-h-[70vh] w-full flex-col gap-4 overflow-y-auto px-4 pb-4">
           {sortedTracks.map((track) => {
             const src = track.track?.album?.images?.[0]?.url ?? '/spotify/spotify-green.png';
             const title = track.track?.name ?? 'Unknown Track';
@@ -107,14 +105,14 @@ export default function PlaylistClient({ playlist, tracks }: PlaylistClientProps
             return (
               <li
                 key={track.track?.id}
-                className="relative aspect-square w-full max-w-[300px] mx-auto rounded-lg"
+                className="relative mx-auto aspect-square w-full max-w-[300px] rounded-lg"
               >
                 <NextImage
                   src={src}
                   alt={title}
                   fill
                   sizes="300px"
-                  className="object-cover rounded-lg"
+                  className="rounded-lg object-cover"
                 />
               </li>
             );

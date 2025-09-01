@@ -46,7 +46,7 @@ export default function HeaderDropdown() {
           {dropdownOpen && (
             <div className="animate-fade-in absolute right-0 z-50 mt-2 w-48 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-black">
               <ul className="flex flex-col">
-                <li className='block md:hidden'>
+                <li className="block md:hidden">
                   <Link
                     href="/about"
                     className="header-dropdown-item"
@@ -55,7 +55,7 @@ export default function HeaderDropdown() {
                     About
                   </Link>
                 </li>
-                <li className='block md:hidden'>
+                <li className="block md:hidden">
                   <hr className="border-gray-200 dark:border-gray-700" />
                 </li>
                 <li>

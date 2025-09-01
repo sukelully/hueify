@@ -102,17 +102,29 @@ function ControlsRow({
         className={`hover:bg-white-active active:bg-white-active cursor-pointer rounded-lg p-2 duration-300 ${playlistsOffset === 0 || isPending ? 'invisible' : ''}`}
         onClick={() => onOffsetChange(-20)}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" className="text-foreground h-6 w-6 rotate-180" fill="currentColor">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          className="text-foreground h-6 w-6 rotate-180"
+          fill="currentColor"
+        >
           <polygon points="7.293 4.707 14.586 12 7.293 19.293 8.707 20.707 17.414 12 8.707 3.293 7.293 4.707" />
         </svg>
       </button>
 
       <button
         onClick={onRefresh}
-        className={`hover:bg-white-active active:bg-white-active cursor-pointer rounded-lg p-2 duration-300 ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
+        className={`hover:bg-white-active active:bg-white-active cursor-pointer rounded-lg p-2 duration-300 ${isPending ? 'cursor-not-allowed opacity-50' : ''}`}
         disabled={isPending}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="text-foreground h-6 w-6" fill="currentColor">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          className="text-foreground h-6 w-6"
+          fill="currentColor"
+        >
           <path d="M 7.59375 3 L 9.0625 5 L 13 5 C 16.324219 5 19 7.675781 19 11 L 19 15 L 16 15 L 20 20.46875 L 24 15 L 21 15 L 21 11 C 21 6.59375 17.40625 3 13 3 Z M 4 3.53125 L 0 9 L 3 9 L 3 13 C 3 17.40625 6.59375 21 11 21 L 16.40625 21 L 14.9375 19 L 11 19 C 7.675781 19 5 16.324219 5 13 L 5 9 L 8 9 Z" />
         </svg>
       </button>
@@ -121,7 +133,14 @@ function ControlsRow({
         className={`hover:bg-white-active active:bg-white-active cursor-pointer rounded-lg p-2 duration-300 ${userPlaylistsLength !== playlistsLimit || isPending ? 'invisible' : ''}`}
         onClick={() => onOffsetChange(20)}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" className="text-foreground h-6 w-6" fill="currentColor">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          className="text-foreground h-6 w-6"
+          fill="currentColor"
+        >
           <polygon points="7.293 4.707 14.586 12 7.293 19.293 8.707 20.707 17.414 12 8.707 3.293 7.293 4.707" />
         </svg>
       </button>
