@@ -19,7 +19,6 @@ export default async function PlaylistPage({ params }: Params) {
   if (!session) return redirect('/signin');
 
   const playlist: PlaylistResponse = await getPlaylist(id);
-  console.log(playlist);
 
   return (
     <div>
