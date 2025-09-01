@@ -4,32 +4,40 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import NextImage from 'next/image';
 import ColorThief from 'colorthief';
+import { PlaylistResponse, TrackObject, EpisodeObject } from '@/types/spotify/playlist';
 
 type PlaylistClientProps = {
-  playlist: any;
-  tracks: any[];
+  playlist: PlaylistResponse;
 };
 
-export default function PlaylistClient({ playlist, tracks }: PlaylistClientProps) {
-  const [sortedTracks, setSortedTracks] = useState<any[]>([]);
+// Type guard to filter only TrackObjects
+function isTrackObject(track: TrackObject | EpisodeObject): track is TrackObject {
+  return 'album' in track;
+}
 
-  // Filter unique albums (first occurrence only)
+export default function PlaylistClient({ playlist }: PlaylistClientProps) {
+  const [sortedTracks, setSortedTracks] = useState<TrackObject[]>([]);
+
+  // Filter only TrackObjects and unique albums
+  const trackItems: TrackObject[] = playlist.tracks.items
+    .map((item) => item.track)
+    .filter(isTrackObject);
+
   const seenAlbums = new Set<string>();
-  const uniqueTracks = tracks.filter((track) => {
-    const albumId = track.track?.album?.id;
-    if (!albumId) return false;
-    if (seenAlbums.has(albumId)) return false;
-    seenAlbums.add(albumId);
+  const uniqueTracks = trackItems.filter((track) => {
+    if (!track.album.id) return false;
+    if (seenAlbums.has(track.album.id)) return false;
+    seenAlbums.add(track.album.id);
     return true;
   });
 
   useEffect(() => {
     async function processColors() {
       const thief = new ColorThief();
-      const results: { track: any; color: [number, number, number] }[] = [];
+      const results: { track: TrackObject; color: [number, number, number] }[] = [];
 
       for (const track of uniqueTracks) {
-        const src = track.track?.album?.images?.[0]?.url ?? '/spotify/spotify-green.png';
+        const src = track.album.images?.[0]?.url ?? '/spotify/spotify-green.png';
 
         const img = new Image();
         img.crossOrigin = 'Anonymous';
@@ -73,7 +81,7 @@ export default function PlaylistClient({ playlist, tracks }: PlaylistClientProps
     processColors();
   }, [uniqueTracks]);
 
-  if (!tracks || tracks.length === 0) {
+  if (!playlist.tracks.items.length) {
     return (
       <div className="relative min-h-screen p-4">
         <DashboardChevron />
@@ -99,12 +107,12 @@ export default function PlaylistClient({ playlist, tracks }: PlaylistClientProps
 
         <ul className="scrollbar-thin scrollbar-thumb-gray-400 flex max-h-[70vh] w-full flex-col gap-4 overflow-y-auto px-4 pb-4">
           {sortedTracks.map((track) => {
-            const src = track.track?.album?.images?.[0]?.url ?? '/spotify/spotify-green.png';
-            const title = track.track?.name ?? 'Unknown Track';
+            const src = track.album.images?.[0]?.url ?? '/spotify/spotify-green.png';
+            const title = track.name ?? 'Unknown Track';
 
             return (
               <li
-                key={track.track?.id}
+                key={track.id}
                 className="relative mx-auto aspect-square w-full max-w-[300px] rounded-lg"
               >
                 <NextImage

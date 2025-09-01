@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { SimplifiedPlaylistObject } from '@/types/playlistResponse';
+import { SimplifiedPlaylistObject } from '@/types/spotify/userPlaylists';
 
 interface PlaylistCardProps {
   playlist: SimplifiedPlaylistObject;

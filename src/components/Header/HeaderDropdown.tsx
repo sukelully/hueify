@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { signIn, signOut, authClient } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
 import { useClickOutside } from '@/hooks/useClickOutside';

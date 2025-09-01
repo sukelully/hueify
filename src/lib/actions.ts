@@ -31,6 +31,26 @@ export async function getUserPlaylists(offset: number = 0, limit: number = 20) {
   return data.items;
 }
 
+// Fetch playlist
+export async function getPlaylist(playlistId: string) {
+  const accessToken = await getAccessToken();
+
+  const res = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error('Spotify fetch error:', text);
+    throw new Error(`Failed to fetch playlist ${playlistId}`);
+  }
+
+  const data = await res.json();
+  return data;
+}
+
 // Fetch specific playlist tracks
 export async function getPlaylistTracks(
   playlistId: string,
@@ -57,23 +77,4 @@ export async function getPlaylistTracks(
 
   const data = await res.json();
   return data.items;
-}
-
-export async function getPlaylist(playlistId: string) {
-  const accessToken = await getAccessToken();
-
-  const res = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    console.error('Spotify fetch error:', text);
-    throw new Error(`Failed to fetch playlist ${playlistId}`);
-  }
-
-  const data = await res.json();
-  return data;
 }

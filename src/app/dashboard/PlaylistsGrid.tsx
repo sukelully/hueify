@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { getUserPlaylists } from '@/app/actions/spotifyClient';
-import { SimplifiedPlaylistObject } from '@/types/playlistResponse';
+import { getUserPlaylists } from '@/lib/actions';
+import { SimplifiedPlaylistObject } from '@/types/spotify/userPlaylists';
 import PlaylistCard from './PlaylistCard';
 import SignInScreen from '@/components/misc/SignInScreen';
 import LoadingScreen from '@/components/misc/LoadingScreen';

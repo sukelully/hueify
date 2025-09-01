@@ -1,14 +1,15 @@
 import PlaylistClient from './PlaylistClient';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
-import { getPlaylist } from '@/app/actions/spotifyClient';
+import { getPlaylist } from '@/lib/actions';
 import { redirect } from 'next/navigation';
+import { PlaylistResponse } from '@/types/spotify/playlist';
 
-type PlaylistPageProps = {
-  params: { id: string };
+type Params = {
+  params: Promise<{ id: string }>;
 };
 
-export default async function PlaylistPage({ params }: PlaylistPageProps) {
+export default async function PlaylistPage({ params }: Params) {
   const { id } = await params;
 
   const session = await auth.api.getSession({
@@ -17,17 +18,12 @@ export default async function PlaylistPage({ params }: PlaylistPageProps) {
 
   if (!session) return redirect('/signin');
 
-  const playlist = await getPlaylist(id);
-
-  const tracks = playlist.tracks.items;
-  for (const track of tracks) {
-    const src = track.track?.album?.images?.[0]?.url ?? '/spotify/spotify-green.png';
-    // console.log(src);
-  }
+  const playlist: PlaylistResponse = await getPlaylist(id);
+  console.log(playlist);
 
   return (
     <div>
-      <PlaylistClient playlist={playlist} tracks={tracks} />
+      <PlaylistClient playlist={playlist} />
     </div>
   );
 }
