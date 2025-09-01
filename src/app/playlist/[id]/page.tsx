@@ -4,7 +4,11 @@ import { headers } from 'next/headers';
 import { getPlaylist } from '@/app/actions/spotifyClient';
 import { redirect } from 'next/navigation';
 
-export default async function PlaylistPage({ params }: { params: { id: string } }) {
+type PlaylistPageProps = {
+  params: { id: string };
+};
+
+export default async function PlaylistPage({ params }: PlaylistPageProps) {
   const { id } = await params;
 
   const session = await auth.api.getSession({
