@@ -39,6 +39,7 @@ export async function getPlaylist(playlistId: string) {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
+    next: { revalidate: 3600 },
   });
 
   if (!res.ok) {
