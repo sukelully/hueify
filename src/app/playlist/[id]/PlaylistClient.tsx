@@ -10,13 +10,19 @@ type PlaylistClientProps = {
   playlist: PlaylistResponse;
 };
 
+type SortedTracks = {
+  track: TrackObject;
+  color: [number, number, number];
+};
+
 // Type guard to filter only TrackObjects
 function isTrackObject(track: TrackObject | EpisodeObject): track is TrackObject {
   return 'album' in track;
 }
 
 export default function PlaylistClient({ playlist }: PlaylistClientProps) {
-  const [sortedTracks, setSortedTracks] = useState<TrackObject[]>([]);
+  const [sortedTracks, setSortedTracks] = useState<SortedTracks[]>([]);
+  const [sortMethod, setSortMethod] = useState<'hue' | 'lum' | 'step'>('hue');
 
   // Filter only TrackObjects and unique albums
   const trackItems: TrackObject[] = playlist.tracks.items
@@ -37,8 +43,7 @@ export default function PlaylistClient({ playlist }: PlaylistClientProps) {
       const results: { track: TrackObject; color: [number, number, number] }[] = [];
 
       for (const track of uniqueTracks) {
-        const src = track.album.images?.[0]?.url ?? '/spotify/spotify-green.png';
-
+        const src = track.album.images?.at(-2)?.url ?? '/spotify/spotify-green.png';
         const img = new Image();
         img.crossOrigin = 'Anonymous';
         img.src = src;
@@ -60,7 +65,8 @@ export default function PlaylistClient({ playlist }: PlaylistClientProps) {
         });
       }
 
-      function rgbToHue([r, g, b]: [number, number, number]) {
+      // Sorting functions
+      function rgbToHue([r, g, b]: [number, number, number]): number {
         r /= 255;
         g /= 255;
         b /= 255;
@@ -74,12 +80,31 @@ export default function PlaylistClient({ playlist }: PlaylistClientProps) {
         return h;
       }
 
-      results.sort((a, b) => rgbToHue(a.color) - rgbToHue(b.color));
-      setSortedTracks(results.map((r) => r.track));
+      function rgbToLum([r, g, b]: [number, number, number]): number {
+        return Math.sqrt(0.241 * r + 0.691 * g + 0.068 * b);
+      }
+
+      function stepSort([r, g, b]: [number, number, number], repetitions: number = 1): number {
+        const lum = rgbToLum([r, g, b]);
+        const h = rgbToHue([r, g, b]);
+        const h2 = Math.floor(h * repetitions);
+        const lum2 = Math.floor(lum * repetitions);
+        return h2 * 10000 + lum2 * 100;
+      }
+
+      // Apply selected sort
+      results.sort((a, b) => {
+        if (sortMethod === 'hue') return rgbToHue(a.color) - rgbToHue(b.color);
+        if (sortMethod === 'lum') return rgbToLum(a.color) - rgbToLum(b.color);
+        if (sortMethod === 'step') return stepSort(a.color, 8) - stepSort(b.color, 8);
+        return 0;
+      });
+
+      setSortedTracks(results.map((r) => ({ track: r.track, color: r.color })));
     }
 
     processColors();
-  }, [uniqueTracks]);
+  }, [uniqueTracks, sortMethod]); // Re-run effect when sortMethod changes
 
   if (!playlist.tracks.items.length) {
     return (
@@ -101,27 +126,45 @@ export default function PlaylistClient({ playlist }: PlaylistClientProps) {
       <div className="flex flex-col items-center gap-6 pt-24 md:pt-28">
         <h1 className="font-corben text-3xl font-bold md:text-4xl">{playlist.name}</h1>
 
-        <button className="btn bg-foreground text-background active:bg-black-active hover:bg-black-active rounded-full px-3 py-2 duration-300">
-          Hueify playlist
-        </button>
+        {/* Sort Dropdown */}
+        <select
+          className="btn bg-foreground text-background rounded-full px-3 py-2 text-center"
+          value={sortMethod}
+          onChange={(e) => setSortMethod(e.target.value as 'hue' | 'lum' | 'step')}
+        >
+          <option value="hue">Hue</option>
+          <option value="lum">Luminosity</option>
+          <option value="step">Step Sort</option>
+        </select>
 
-        <ul className="scrollbar-thin scrollbar-thumb-gray-400 flex max-h-[70vh] w-full flex-col gap-4 overflow-y-auto px-4 pb-4">
+        <ul className="scrollbar-thin scrollbar-thumb-gray-400 flex flex-col gap-4 overflow-y-auto px-4 pb-4">
           {sortedTracks.map((track) => {
-            const src = track.album.images?.[0]?.url ?? '/spotify/spotify-green.png';
-            const title = track.name ?? 'Unknown Track';
+            const src = track.track.album.images?.[1]?.url ?? '/spotify/spotify-green.png';
+            const title = track.track.name ?? 'Unknown Track';
+            const [r, g, b] = track.color;
 
             return (
               <li
-                key={track.id}
-                className="relative mx-auto aspect-square w-full max-w-[300px] rounded-lg"
+                key={track.track.id}
+                className="flex flex-col items-center gap-4 rounded-lg bg-gray-100 p-2"
               >
-                <NextImage
-                  src={src}
-                  alt={title}
-                  fill
-                  sizes="300px"
-                  className="rounded-lg object-cover"
-                />
+                {/* Album Cover */}
+                <div className="relative h-32 w-32">
+                  <NextImage
+                    src={src}
+                    alt={title}
+                    fill
+                    sizes="64px"
+                    className="rounded-lg object-cover"
+                  />
+                </div>
+
+                {/* RGB Color Div */}
+                <div
+                  className="h-8 w-8 rounded-full"
+                  style={{ backgroundColor: `rgb(${r}, ${g}, ${b})` }}
+                  title={`RGB(${r}, ${g}, ${b})`}
+                ></div>
               </li>
             );
           })}
