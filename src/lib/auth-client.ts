@@ -9,6 +9,7 @@ export const signIn = async () => {
   await authClient.signIn.social({
     provider: 'spotify',
     callbackURL: '/dashboard',
+    errorCallbackURL: '/error',
   });
 };
 
@@ -17,6 +18,9 @@ export const signOut = async (router: AppRouterInstance) => {
     fetchOptions: {
       onSuccess: () => {
         router.push('/');
+      },
+      onError: () => {
+        router.push('/error');
       },
     },
   });

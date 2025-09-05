@@ -4,8 +4,7 @@ import { useState, useTransition } from 'react';
 import { getUserPlaylists } from '@/lib/actions';
 import { SimplifiedPlaylistObject } from '@/types/spotify/userPlaylists';
 import PlaylistCard from './PlaylistCard';
-import SignInScreen from '@/components/misc/SignInScreen';
-import LoadingScreen from '@/components/misc/LoadingScreen';
+import LoadingScreen from '@/components/ui/LoadingScreen';
 
 type Session = {
   user: {
@@ -49,8 +48,6 @@ export default function PlaylistsGrid({
       }
     });
   };
-
-  if (!session) return <SignInScreen />;
 
   if (isPending) return <LoadingScreen />;
 
