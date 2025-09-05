@@ -43,6 +43,7 @@ export default function PlaylistsGrid({
       try {
         const data = await getUserPlaylists(offset, limit);
         setPlaylists(data);
+        console.log(playlists);
       } catch (err) {
         console.error('Failed to fetch playlists', err);
       }
