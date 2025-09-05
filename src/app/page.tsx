@@ -1,11 +1,12 @@
-'use client';
-
 import Link from 'next/link';
-import SignInBtn from '@/components/misc/SignInBtn';
-import { authClient } from '@/lib/auth-client';
+import SignInBtn from '@/components/ui/SignInBtn';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
 
-export default function Home() {
-  const { data: session } = authClient.useSession();
+export default async function Home() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4 sm:px-16">

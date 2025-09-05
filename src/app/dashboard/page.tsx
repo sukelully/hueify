@@ -18,17 +18,8 @@ export default async function Dashboard() {
     playlists = await getUserPlaylists();
   } catch (error) {
     console.error(error);
-    return <ErrorScreen />;
+    redirect('/error');
   }
 
   return <PlaylistsGrid initialPlaylists={playlists} session={session} />;
-}
-
-function ErrorScreen() {
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-      <h1 className="font-corben mb-4 text-3xl font-bold">Oops.</h1>
-      <p className="text-secondary-text">Something went wrong.</p>
-    </div>
-  );
 }

@@ -1,4 +1,4 @@
-import SignInBtn from '@/components/misc/SignInBtn';
+import SignInBtn from '@/components/ui/SignInBtn';
 
 export default function SignIn() {
   return (
