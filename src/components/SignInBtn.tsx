@@ -3,7 +3,11 @@ import { useState } from 'react';
 import { signIn } from '@/lib/auth-client';
 import Image from 'next/image';
 
-export default function SignInBtn(isLogo: boolean) {
+type SignInBtnProps = {
+  isLogo?: boolean;
+};
+
+export default function SignInBtn({ isLogo = false }: SignInBtnProps) {
   const [isPending, setIsPending] = useState(false);
 
   async function handlelick() {

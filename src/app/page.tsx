@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import SignInBtn from '@/components/ui/SignInBtn';
+import SignInBtn from '@/components/SignInBtn';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 
@@ -18,7 +18,7 @@ export default async function Home() {
           Get started
         </Link>
       ) : (
-        <SignInBtn />
+        <SignInBtn isLogo />
       )}
     </div>
   );
