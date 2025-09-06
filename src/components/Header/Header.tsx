@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { authClient } from '@/lib/auth-client';
@@ -10,12 +10,38 @@ import SignOutBtn from '../SignOutBtn';
 export default function Header() {
   const { data: session } = authClient.useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  // console.log(session);
+  const [dropdownMenuOpen, setDropdownMenuOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+  function closeMobileMenu() {
+    setMobileMenuOpen(false);
+  }
+
+  function toggleDropdown() {
+    setDropdownMenuOpen((prev) => !prev);
+  }
+
+  // Close dropdown if clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const navItems = [
+    { href: '/about', label: 'About' },
+    { href: '/', label: 'Test' },
+  ];
 
   return (
-    <header className="from-header-grad to-background left fixed top-0 z-10 w-full bg-gradient-to-b">
+    <header className="from-header-grad to-background fixed top-0 left-0 z-10 w-full bg-gradient-to-b">
       <section className="flex items-center justify-between gap-4 px-6 py-3 lg:px-48">
-        <Link href="/" className="flex flex-row gap-4">
+        {/* Logo */}
+        <Link href="/" className="flex flex-row items-center gap-4">
           <Image
             src="/header/logo.png"
             alt="Hueify logo"
@@ -28,63 +54,116 @@ export default function Header() {
           </h1>
         </Link>
 
-        <div className="flex items-center gap-4 space-x-6">
-          <nav className="flex items-center gap-4 space-x-6">
-            <Link href="/about" className="desktop-header-item hidden md:block">
-              About
-            </Link>
-            <Link href="/" className="desktop-header-item hidden md:block">
-              Test
-            </Link>
+        {/* Right side (nav + auth) */}
+        <div className="flex items-center gap-6">
+          {/* Desktop nav */}
+          <nav className="hidden items-center gap-6 md:flex">
+            {navItems.map((item) => (
+              <Link key={item.href} href={item.href} className="desktop-header-item">
+                {item.label}
+              </Link>
+            ))}
           </nav>
-          {session ? (
-            <button
-              onClick={() => setMobileMenuOpen((prev) => !prev)}
-              className="flex cursor-pointer items-center justify-center focus:outline-none"
-            >
-              {session.user?.image ? (
-                <Image
-                  className="rounded-full"
-                  src={session.user.image}
-                  alt="User profile image"
-                  width={38}
-                  height={38}
-                />
-              ) : (
-                <div className="group hover:bg-white-active active:bg-white-active rounded p-2 duration-300">
-                  <span className="bg-secondary-text group-hover:bg-foreground group-active:bg-foreground mb-1 block h-0.5 w-6 duration-300"></span>
-                  <span className="bg-secondary-text group-hover:bg-foreground group-active:bg-foreground mb-1 block h-0.5 w-6 duration-300"></span>
-                  <span className="bg-secondary-text group-hover:bg-foreground group-active:bg-foreground block h-0.5 w-6 duration-300"></span>
-                </div>
-              )}
-            </button>
-          ) : (
-            <button onClick={() => setMobileMenuOpen((prev) => !prev)}>
-              <div className="group hover:bg-white-active active:bg-white-active rounded p-2 duration-300">
-                <span className="bg-secondary-text group-hover:bg-foreground group-active:bg-foreground mb-1 block h-0.5 w-6 duration-300"></span>
-                <span className="bg-secondary-text group-hover:bg-foreground group-active:bg-foreground mb-1 block h-0.5 w-6 duration-300"></span>
-                <span className="bg-secondary-text group-hover:bg-foreground group-active:bg-foreground block h-0.5 w-6 duration-300"></span>
+
+          {/* Mobile menu toggle - always show on mobile */}
+          <button
+            className="hover:bg-white-active active:bg-white-active block cursor-pointer rounded p-2 duration-300 md:hidden"
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+          >
+            <MobileMenuIcon />
+          </button>
+
+          {/* Desktop auth section */}
+          <div className="hidden md:block">
+            {session ? (
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={toggleDropdown}
+                  className="flex cursor-pointer items-center justify-center focus:outline-none"
+                >
+                  {session.user?.image ? (
+                    <Image
+                      className="rounded-full"
+                      src={session.user.image}
+                      alt="User profile image"
+                      width={38}
+                      height={38}
+                    />
+                  ) : (
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-300">
+                      <span className="text-sm font-medium">
+                        {session.user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                  )}
+                </button>
+
+                {/* Desktop dropdown */}
+                {dropdownMenuOpen && (
+                  <div className="bg-background absolute right-0 mt-2 w-48 rounded-xl shadow-lg ring-1 ring-black/10 dark:bg-neutral-900">
+                    <nav className="flex flex-col p-2 text-lg">
+                      <Link
+                        href="/dashboard"
+                        className="focus:ring-primary rounded-lg px-3 py-2 transition-colors hover:bg-neutral-100 focus:ring-2 focus:outline-none active:bg-neutral-200 dark:hover:bg-neutral-800 dark:active:bg-neutral-700"
+                      >
+                        Dashboard
+                      </Link>
+                      <hr className="my-2 border-gray-200 dark:border-gray-700" />
+                      <SignOutBtn onClick={() => setDropdownMenuOpen(false)} />
+                    </nav>
+                  </div>
+                )}
               </div>
-            </button>
-          )}
+            ) : (
+              <SignInBtn />
+            )}
+          </div>
         </div>
       </section>
 
       {/* Mobile menu */}
       <section
-        className={`bg-background absolute mt-4 w-full origin-top flex-col justify-center px-8 text-2xl ${mobileMenuOpen ? 'flex' : 'hidden'}`}
+        className={`bg-background absolute w-full origin-top flex-col justify-center px-8 pt-4 text-2xl md:hidden ${
+          mobileMenuOpen ? 'flex' : 'hidden'
+        }`}
       >
-        {session ? <SignOutBtn /> : <SignInBtn />}
+        {/* Auth section in mobile menu */}
+        {session ? (
+          <SignOutBtn onClick={closeMobileMenu} />
+        ) : (
+          <SignInBtn onClick={closeMobileMenu} />
+        )}
+
+        {/* Navigation in mobile menu */}
         <nav className="flex min-h-screen flex-col gap-4 py-8">
           <hr className="border-gray-200 dark:border-gray-700" />
-          <Link href="/about" className="text-secondary-text">
-            About
-          </Link>
-          <Link href="/" className="text-secondary-text">
-            Test
-          </Link>
+          {session && (
+            <Link href="/dashboard" className="text-secondary-text" onClick={closeMobileMenu}>
+              Dashboard
+            </Link>
+          )}
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="text-secondary-text"
+              onClick={closeMobileMenu}
+            >
+              {item.label}
+            </Link>
+          ))}
         </nav>
       </section>
     </header>
+  );
+}
+
+function MobileMenuIcon() {
+  return (
+    <div>
+      <span className="bg-secondary-text mb-1 block h-0.5 w-6"></span>
+      <span className="bg-secondary-text mb-1 block h-0.5 w-6"></span>
+      <span className="bg-secondary-text block h-0.5 w-6"></span>
+    </div>
   );
 }

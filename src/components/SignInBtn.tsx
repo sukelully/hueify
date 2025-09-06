@@ -5,12 +5,18 @@ import Image from 'next/image';
 
 type SignInBtnProps = {
   isLogo?: boolean;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 };
 
-export default function SignInBtn({ isLogo = false }: SignInBtnProps) {
+export default function SignInBtn({ isLogo = false, onClick }: SignInBtnProps) {
   const [isPending, setIsPending] = useState(false);
 
-  async function handlelick() {
+  async function handlelick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+    if (onClick) {
+      // Close mobile menu
+      onClick(event);
+    }
+
     setIsPending(true);
 
     await signIn.social({
@@ -26,12 +32,12 @@ export default function SignInBtn({ isLogo = false }: SignInBtnProps) {
     <button
       onClick={handlelick}
       disabled={isPending}
-      className="sign-in-btn btn btn hover:bg-black-active active:bg-black-active flex min-w-[180px] cursor-pointer items-center gap-2 rounded-full bg-black px-6 py-3 font-semibold text-white transition sm:text-lg dark:bg-white dark:text-black"
+      className={`sign-in-btn btn hover:bg-black-active active:bg-black-active cursor-pointer items-center bg-black font-semibold text-white transition dark:bg-white dark:text-black ${isLogo ? 'flex min-w-[180px] gap-2 rounded-full px-6 py-3 sm:text-lg' : 'rounded-lg px-4 py-2'}`}
     >
       {isLogo && (
         <Image src="/spotify/spotify-green.png" alt="Spotify logo" width={24} height={24} />
       )}
-      <span>Continue with Spotify</span>
+      <span>{isLogo ? 'Continue with Spotify' : 'Sign in'}</span>
     </button>
   );
 }
