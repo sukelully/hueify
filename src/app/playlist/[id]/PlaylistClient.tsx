@@ -61,11 +61,11 @@ export default function PlaylistClient({ playlist }: PlaylistClientProps) {
               const palette = thief.getPalette(img) as [number, number, number][];
 
               // Choose the best representative color
-              const bestColor = chooseBestColor(dominantColor, palette);
+              // const bestColor = chooseBestColor(dominantColor, palette);
 
               results.push({
                 track,
-                color: bestColor,
+                color: dominantColor,
                 dominantColor,
                 colorPalette: palette || [dominantColor],
               });

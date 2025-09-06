@@ -83,5 +83,3 @@ body {
     content: url('/spotify/spotify-black.png');
   }
 }
-
-@custom-variant dark (&:where(.dark, .dark *));
