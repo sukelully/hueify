@@ -65,12 +65,12 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Mobile menu toggle - always show on mobile */}
+          {/* Mobile menu toggle */}
           <button
             className="hover:bg-white-active active:bg-white-active block cursor-pointer rounded p-2 duration-300 md:hidden"
             onClick={() => setMobileMenuOpen((prev) => !prev)}
           >
-            <MobileMenuIcon />
+            <MobileMenuIcon isOpen={mobileMenuOpen} />
           </button>
 
           {/* Desktop auth section */}
@@ -104,7 +104,7 @@ export default function Header() {
                     <nav className="flex flex-col p-2 text-lg">
                       <Link
                         href="/dashboard"
-                        className="focus:ring-primary rounded-lg px-3 py-2 transition-colors hover:bg-neutral-100 focus:ring-2 focus:outline-none active:bg-neutral-200 dark:hover:bg-neutral-800 dark:active:bg-neutral-700"
+                        className="hover:bg-white-active active:bg-white-active dark:hover:bg-neutral rounded-lg px-3 py-2 transition-colors duration-300"
                       >
                         Dashboard
                       </Link>
@@ -158,12 +158,24 @@ export default function Header() {
   );
 }
 
-function MobileMenuIcon() {
+function MobileMenuIcon({ isOpen }: { isOpen: boolean }) {
   return (
-    <div>
-      <span className="bg-secondary-text mb-1 block h-0.5 w-6"></span>
-      <span className="bg-secondary-text mb-1 block h-0.5 w-6"></span>
-      <span className="bg-secondary-text block h-0.5 w-6"></span>
+    <div className="relative h-6 w-6">
+      <span
+        className={`bg-secondary-text absolute left-0 block h-0.5 w-6 transition-all duration-300 ease-in-out ${
+          isOpen ? 'top-3 rotate-45' : 'top-1'
+        }`}
+      ></span>
+      <span
+        className={`bg-secondary-text absolute top-3 left-0 block h-0.5 w-6 transition-all duration-300 ease-in-out ${
+          isOpen ? 'opacity-0' : ''
+        }`}
+      ></span>
+      <span
+        className={`bg-secondary-text absolute left-0 block h-0.5 w-6 transition-all duration-300 ease-in-out ${
+          isOpen ? 'top-3 -rotate-45' : 'top-5'
+        }`}
+      ></span>
     </div>
   );
 }
