@@ -7,7 +7,7 @@
   --primary-foreground: #0a0a0a;
   --primary-hover: #3feb7a;
   --black-active: #404040;
-  --white-active: #e5e5e5;
+  --white-active: #ededed;
   --grad-1: #2563eb;
   --grad-2: #d83af0;
   --grad-3: #f43f5e;
@@ -83,3 +83,5 @@ body {
     content: url('/spotify/spotify-black.png');
   }
 }
+
+@custom-variant dark (&:where(.dark, .dark *));

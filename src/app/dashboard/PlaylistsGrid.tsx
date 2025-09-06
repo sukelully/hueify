@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { getUserPlaylists } from '@/lib/actions';
 import { SimplifiedPlaylistObject } from '@/types/spotify/userPlaylists';
 import PlaylistCard from './PlaylistCard';
-import LoadingScreen from '@/components/ui/LoadingScreen';
+import LoadingScreen from '@/components/LoadingScreen';
 
 type Session = {
   user: {
