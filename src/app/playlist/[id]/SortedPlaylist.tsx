@@ -1,145 +1,192 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import NextImage from 'next/image';
 import ColorThief from 'colorthief';
 import { PlaylistResponse, TrackObject, EpisodeObject } from '@/types/spotify/playlist';
 import chroma from 'chroma-js';
 
-type SortedTracks = {
+type ProcessedTrack = {
   track: TrackObject | EpisodeObject;
-  color: [number, number, number]; // R, G, B
   dominantColor: [number, number, number];
   colorPalette: [number, number, number][];
+  lch: [number, number, number]; // Pre-calculated for sorting
 };
 
 type SortedPlaylistProps = {
   playlist: PlaylistResponse;
 };
 
+const FALLBACK_COLOR: [number, number, number] = [128, 128, 128];
+const FALLBACK_IMAGE = '/spotify/spotify-green.png';
+const IMAGE_LOAD_TIMEOUT = 8000;
+const BATCH_SIZE = 5;
+
 export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
-  const [sortedPlaylist, setSortedPlaylist] = useState<SortedTracks[]>([]);
+  const [processedTracks, setProcessedTracks] = useState<ProcessedTrack[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
 
-  useEffect(() => {
-    async function processColors() {
-      console.log('Starting to process colors for', playlist.tracks.items.length, 'items');
-      const thief = new ColorThief();
-      const results: SortedTracks[] = [];
+  // Extract artwork URL
+  const getArtworkUrl = (track: TrackObject | EpisodeObject, index: number = 1): string => {
+    if (index < 0 || index > 2) {
+      throw new Error('Error: requested artwork index is out of range');
+    }
+    const images = 'album' in track ? track.album?.images : track.images;
 
-      for (const [index, item] of playlist.tracks.items.entries()) {
-        const trackOrEpisode = item.track as TrackObject | EpisodeObject;
+    if (!images?.length) return FALLBACK_IMAGE;
 
-        // Get artwork URL safely
-        const artworkUrl: string = (() => {
-          // Pick low resolution image for better performance or spotify fallback
-          if ('album' in trackOrEpisode) {
-            // Track album art
-            return (
-              trackOrEpisode.album.images.at(-2)?.url ??
-              trackOrEpisode.album.images.at(0)?.url ??
-              '/spotify/spotify-green.png'
-            );
-          } else if ('images' in trackOrEpisode) {
-            // Podcast episodes
-            return (
-              trackOrEpisode.images.at(-2)?.url ??
-              trackOrEpisode.images.at(0)?.url ??
-              '/spotify/spotify-green.png'
-            );
-          } else {
-            // Fallback
-            return '/spotify/spotify-green.png';
+    // Prefer low resolution images for better performance
+    return images[index]?.url || images[2]?.url || FALLBACK_IMAGE;
+  };
+
+  // Process a single track's color data
+  const processTrackColor = async (
+    track: TrackObject | EpisodeObject,
+    thief: ColorThief
+  ): Promise<ProcessedTrack> => {
+    const artworkUrl = getArtworkUrl(track);
+
+    try {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+
+      const { dominantColor, palette } = await new Promise<{
+        dominantColor: [number, number, number];
+        palette: [number, number, number][];
+      }>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Image load timeout'));
+        }, IMAGE_LOAD_TIMEOUT);
+
+        img.onload = () => {
+          clearTimeout(timeout);
+          try {
+            const dominantColor = thief.getColor(img) as [number, number, number];
+            const palette = (thief.getPalette(img) as [number, number, number][]) || [
+              dominantColor,
+            ];
+
+            resolve({ dominantColor, palette });
+          } catch (colorError) {
+            console.warn(`ColorThief failed for ${track.name}:`, colorError);
+            resolve({
+              dominantColor: FALLBACK_COLOR,
+              palette: [FALLBACK_COLOR],
+            });
           }
-        })();
+        };
 
-        try {
-          const img = new Image();
-          img.crossOrigin = 'Anonymous';
-
-          await new Promise<void>((resolve, reject) => {
-            const timeout = setTimeout(() => {
-              console.log(`Timeout loading image for: ${trackOrEpisode.name}`);
-              reject(new Error('Image load timeout'));
-            }, 10000); // 10 second timeout
-
-            img.onload = () => {
-              clearTimeout(timeout);
-              try {
-                // Extract colors
-                const dominantColor = thief.getColor(img) as [number, number, number];
-                const palette = thief.getPalette(img) as [number, number, number][];
-
-                results.push({
-                  track: trackOrEpisode,
-                  color: dominantColor,
-                  dominantColor: dominantColor,
-                  colorPalette: palette || [dominantColor],
-                });
-
-                console.log(
-                  `Processed ${index + 1}/${playlist.tracks.items.length}: ${trackOrEpisode.name} - RGB(${dominantColor.join(', ')})`
-                );
-
-                // Update state progressively for better UX
-                setSortedPlaylist([...results]);
-                resolve();
-              } catch (colorError) {
-                console.error('ColorThief error for', trackOrEpisode.name, colorError);
-                // Fallback color
-                const fallback: [number, number, number] = [128, 128, 128];
-                results.push({
-                  track: trackOrEpisode,
-                  color: fallback,
-                  dominantColor: fallback,
-                  colorPalette: [fallback],
-                });
-                setSortedPlaylist([...results]);
-                resolve();
-              }
-            };
-
-            img.onerror = () => {
-              clearTimeout(timeout);
-              console.error('Image failed to load:', artworkUrl);
-              // Fallback color
-              const fallback: [number, number, number] = [128, 128, 128];
-              results.push({
-                track: trackOrEpisode,
-                color: fallback,
-                dominantColor: fallback,
-                colorPalette: [fallback],
-              });
-              setSortedPlaylist([...results]);
-              resolve();
-            };
-
-            img.src = artworkUrl;
+        img.onerror = () => {
+          clearTimeout(timeout);
+          console.warn(`Failed to load image for ${track.name}:`, artworkUrl);
+          resolve({
+            dominantColor: FALLBACK_COLOR,
+            palette: [FALLBACK_COLOR],
           });
-        } catch (error) {
-          console.error('Error processing track:', trackOrEpisode.name, error);
-          // Add fallback even on error
-          const fallback: [number, number, number] = [128, 128, 128];
-          results.push({
-            track: trackOrEpisode,
-            color: fallback,
-            dominantColor: fallback,
-            colorPalette: [fallback],
-          });
-        }
+        };
+
+        img.src = artworkUrl;
+      });
+
+      // Pre-calculate LCH for sorting
+      const lch = getLCH(dominantColor);
+
+      return {
+        track,
+        dominantColor,
+        colorPalette: palette,
+        lch,
+      };
+    } catch (error) {
+      console.warn(`Error processing ${track.name}:`, error);
+      return {
+        track,
+        dominantColor: FALLBACK_COLOR,
+        colorPalette: [FALLBACK_COLOR],
+        lch: getLCH(FALLBACK_COLOR),
+      };
+    }
+  };
+
+  // Convert from RGB to LCH colors
+  const getLCH = (rgb: [number, number, number]): [number, number, number] => {
+    try {
+      return chroma(rgb).lch() as [number, number, number];
+    } catch {
+      return [50, 0, 0]; // Neutral gray fallback
+    }
+  };
+
+  // Process tracks in batches
+  const processTracksInBatches = async (tracks: (TrackObject | EpisodeObject)[]) => {
+    const thief = new ColorThief();
+    const results: ProcessedTrack[] = [];
+
+    for (let i = 0; i < tracks.length; i += BATCH_SIZE) {
+      const batch = tracks.slice(i, i + BATCH_SIZE);
+
+      const batchResults = await Promise.all(batch.map((track) => processTrackColor(track, thief)));
+
+      results.push(...batchResults);
+      setProgress(results.length);
+
+      // Update state after each batch for progressive loading
+      setProcessedTracks([...results]);
+    }
+
+    return results;
+  };
+
+  // Sort tracks by hue, then by lightness, then by chroma
+  const sortedTracks = useMemo(() => {
+    return [...processedTracks].sort((a, b) => {
+      const [lA, cA, hA] = a.lch;
+      const [lB, cB, hB] = b.lch;
+
+      // Primary sort: Hue (0-360°)
+      const hueA = isNaN(hA) ? 0 : hA;
+      const hueB = isNaN(hB) ? 0 : hB;
+      if (Math.abs(hueA - hueB) > 5) {
+        // 5° tolerance
+        return hueA - hueB;
       }
 
-      console.log('Finished processing. Total results:', results.length);
-      setSortedPlaylist(results);
-      setIsLoading(false);
-    }
+      // Secondary sort: Lightness
+      if (Math.abs(lA - lB) > 5) {
+        return lB - lA; // Lighter colors first
+      }
 
-    if (playlist.tracks.items.length > 0) {
-      processColors();
-    } else {
-      setIsLoading(false);
-    }
+      // Tertiary sort: Chroma (saturation)
+      return cB - cA; // More saturated colors first
+    });
+  }, [processedTracks]);
+
+  useEffect(() => {
+    const processColors = async () => {
+      const tracks = playlist.tracks.items
+        .map((item) => item.track as TrackObject | EpisodeObject)
+        .filter(Boolean); // Remove any null/undefined tracks
+
+      if (tracks.length === 0) {
+        setIsLoading(false);
+        return;
+      }
+
+      console.log(`Processing colors for ${tracks.length} tracks...`);
+
+      try {
+        await processTracksInBatches(tracks);
+        console.log('Color processing complete!');
+      } catch (error) {
+        console.error('Error processing playlist colors:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    processColors();
   }, [playlist.tracks.items]);
 
   if (!playlist.tracks.items.length) {
@@ -163,37 +210,28 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
         <h1 className="font-corben text-3xl font-bold md:text-4xl">{playlist.name}</h1>
 
         {isLoading && (
-          <div className="text-gray-600">
-            Loading colors... ({sortedPlaylist.length}/{playlist.tracks.items.length})
+          <div className="flex flex-col items-center gap-2 text-gray-600">
+            <div>Processing colors...</div>
+            <div className="text-sm">
+              {progress} / {playlist.tracks.items.length} tracks
+            </div>
+            <div className="h-2 w-64 rounded-full bg-gray-200">
+              <div
+                className="h-2 rounded-full bg-blue-500 transition-all duration-300"
+                style={{
+                  width: `${(progress / playlist.tracks.items.length) * 100}%`,
+                }}
+              />
+            </div>
           </div>
         )}
 
         <ul className="scrollbar-thin scrollbar-thumb-gray-400 grid grid-cols-4 gap-4 overflow-y-auto px-4 pb-4 md:grid-cols-6">
-          {sortedPlaylist.map((item, index) => {
-            // Handle both tracks and episodes for image source
-            let src: string;
-            if ('album' in item.track && item.track.album?.images?.[1]?.url) {
-              src = item.track.album.images[1].url;
-            } else if ('album' in item.track && item.track.album?.images?.[0]?.url) {
-              src = item.track.album.images[0].url;
-            } else if ('images' in item.track && item.track.images?.[1]?.url) {
-              src = item.track.images[1].url;
-            } else if ('images' in item.track && item.track.images?.[0]?.url) {
-              src = item.track.images[0].url;
-            } else {
-              src = '/spotify/spotify-green.png';
-            }
-
-            const title = item.track.name ?? 'Unknown Track';
-            const [r, g, b] = item.color;
-
-            const [L, C, H] = (() => {
-              try {
-                return chroma(r, g, b).lch();
-              } catch {
-                return [50, 0, 0]; // Fallback for invalid colors
-              }
-            })();
+          {sortedTracks.map((item, index) => {
+            const src = getArtworkUrl(item.track, 0);
+            const title = item.track.name || 'Unknown Track';
+            const [r, g, b] = item.dominantColor;
+            const [L, C, H] = item.lch;
 
             return (
               <li
@@ -209,17 +247,15 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
                     fill
                     sizes="(max-width: 768px) 96px, 128px"
                     className="rounded-lg object-cover"
-                    unoptimized // Add this to avoid Next.js optimization issues with external URLs
+                    unoptimized
                   />
                 </div>
 
-                {/* Color Information */}
-                <div className="flex flex-col items-center gap-1">
-                  <div
-                    className="h-6 w-6 rounded-full border border-gray-300 shadow-sm"
-                    style={{ backgroundColor: `rgb(${r}, ${g}, ${b})` }}
-                  ></div>
-                </div>
+                {/* Color Swatch */}
+                <div
+                  className="h-6 w-6 rounded-full border border-gray-300 shadow-sm"
+                  style={{ backgroundColor: `rgb(${r}, ${g}, ${b})` }}
+                />
               </li>
             );
           })}
