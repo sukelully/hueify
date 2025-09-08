@@ -1,9 +1,10 @@
-import PlaylistClient from './PlaylistClient';
+// import PlaylistClient from './SortedPlaylist';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { getPlaylist } from '@/lib/actions';
 import { redirect } from 'next/navigation';
 import { PlaylistResponse } from '@/types/spotify/playlist';
+import SortedPlaylist from './SortedPlaylist';
 
 type Params = {
   params: Promise<{ id: string }>;
@@ -22,7 +23,8 @@ export default async function PlaylistPage({ params }: Params) {
 
   return (
     <div>
-      <PlaylistClient playlist={playlist} />
+      {/* <PlaylistClient playlist={playlist} /> */}
+      <SortedPlaylist playlist={playlist} />
     </div>
   );
 }
