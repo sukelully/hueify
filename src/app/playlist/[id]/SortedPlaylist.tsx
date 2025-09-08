@@ -33,22 +33,23 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
 
         // Get artwork URL safely
         const artworkUrl: string = (() => {
+          // Pick low resolution image for better performance or spotify fallback
           if ('album' in trackOrEpisode) {
-            // TrackObject: pick second-to-last image if available
+            // Track album art
             return (
               trackOrEpisode.album.images.at(-2)?.url ??
               trackOrEpisode.album.images.at(0)?.url ??
               '/spotify/spotify-green.png'
             );
           } else if ('images' in trackOrEpisode) {
-            // EpisodeObject: pick second-to-last image if available
+            // Podcast episodes
             return (
               trackOrEpisode.images.at(-2)?.url ??
               trackOrEpisode.images.at(0)?.url ??
               '/spotify/spotify-green.png'
             );
           } else {
-            // Fallback if neither
+            // Fallback
             return '/spotify/spotify-green.png';
           }
         })();
@@ -66,7 +67,7 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
             img.onload = () => {
               clearTimeout(timeout);
               try {
-                // Extract colors using ColorThief
+                // Extract colors
                 const dominantColor = thief.getColor(img) as [number, number, number];
                 const palette = thief.getPalette(img) as [number, number, number][];
 
