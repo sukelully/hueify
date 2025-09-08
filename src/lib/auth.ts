@@ -12,7 +12,12 @@ export const auth = betterAuth({
       clientId: process.env.SPOTIFY_CLIENT_ID!,
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET!,
       redirectURI: process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI!,
-      scope: ['playlist-read-private', 'playlist-read-collaborative'],
+      scope: [
+        'playlist-read-private',
+        'playlist-read-collaborative',
+        'playlist-modify-public',
+        'playlist-modify-private',
+      ],
     },
   },
   session: {

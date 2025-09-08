@@ -6,6 +6,7 @@ import NextImage from 'next/image';
 import ColorThief from 'colorthief';
 import { PlaylistResponse, TrackObject, EpisodeObject } from '@/types/spotify/playlist';
 import chroma from 'chroma-js';
+import { getUserId } from '@/lib/actions';
 
 type ProcessedTrack = {
   track: TrackObject | EpisodeObject;
@@ -27,6 +28,13 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
   const [processedTracks, setProcessedTracks] = useState<ProcessedTrack[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [spotifyId, setSpotifyId] = useState<string | null>(null);
+
+  const getSpotifyId = async () => {
+    const userId = await getUserId();
+
+    setSpotifyId(userId);
+  };
 
   // Extract artwork URL
   const getArtworkUrl = (track: TrackObject | EpisodeObject, index: number = 1): string => {
@@ -208,6 +216,13 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
 
       <div className="flex flex-col items-center gap-6 pt-24 md:pt-28">
         <h1 className="font-corben text-3xl font-bold md:text-4xl">{playlist.name}</h1>
+        <span>{spotifyId ?? 'spotify ID loading'}</span>
+        <button
+          onClick={getSpotifyId}
+          className="btn hover:bg-black-active active:bg-black-active cursor-pointer rounded-lg bg-black px-4 py-2 font-semibold text-white transition dark:bg-white dark:text-black"
+        >
+          Fetch spotify ID
+        </button>
 
         {isLoading && (
           <div className="flex flex-col items-center gap-2 text-gray-600">
