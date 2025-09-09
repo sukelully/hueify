@@ -80,6 +80,7 @@ export async function getPlaylistTracks(
   return data.items;
 }
 
+// Get Spotify user ID
 export async function getUserId() {
   const accessToken = await getAccessToken();
 
@@ -96,9 +97,35 @@ export async function getUserId() {
   if (!res.ok) {
     const text = await res.text();
     console.error('Spotify fetch error:', text);
-    throw new Error(`Failed to fetch Spotify user ID`);
+    throw new Error('Failed to fetch Spotify user ID');
   }
 
   const data = await res.json();
   return data.id;
+}
+
+// Create public playlist
+export async function createPlaylist(playlistName: string) {
+  const userId = await getUserId();
+  const accessToken = await getAccessToken();
+
+  const playlistData = {
+    name: playlistName,
+    description: 'Sorted by color with Hueify',
+  };
+
+  const res = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(playlistData),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error('Spotify create playlist error:', text);
+    throw new Error('Failed to create new playlist');
+  }
 }

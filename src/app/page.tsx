@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import SignInBtn from '@/components/SignInBtn';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
