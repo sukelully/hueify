@@ -6,7 +6,7 @@ import NextImage from 'next/image';
 import ColorThief from 'colorthief';
 import { PlaylistResponse, TrackObject, EpisodeObject } from '@/types/spotify/playlist';
 import chroma from 'chroma-js';
-import { createPlaylist } from '@/lib/actions';
+import { createPlaylist, populatePlaylist } from '@/lib/actions';
 
 type ProcessedTrack = {
   track: TrackObject | EpisodeObject;
@@ -27,11 +27,13 @@ const BATCH_SIZE = 5;
 export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
   const [processedTracks, setProcessedTracks] = useState<ProcessedTrack[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [sortedTrackUris, setSortedTrackUris] = useState<string[]>([]);
   const [progress, setProgress] = useState(0);
 
   const createNewPlaylist = async () => {
     const playlistName = `${playlist.name} hueify test`;
-    await createPlaylist(playlistName);
+    const playlistId = await createPlaylist(playlistName);
+    await populatePlaylist(playlistId, sortedTrackUris);
   };
 
   // Extract artwork URL
@@ -170,6 +172,7 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
     });
   }, [processedTracks]);
 
+  // Process tracks
   useEffect(() => {
     const processColors = async () => {
       const tracks = playlist.tracks.items
@@ -195,6 +198,22 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
 
     processColors();
   }, [playlist.tracks.items]);
+
+  // Extract track uris to array for populating new playlist
+  useEffect(() => {
+    if (sortedTracks.length > 0) {
+      const uris = sortedTracks
+        .map((item) => {
+          if ('uri' in item.track && item.track.uri) {
+            return item.track.uri;
+          }
+          return null;
+        })
+        .filter((uri): uri is string => uri !== null);
+
+      setSortedTrackUris(uris);
+    }
+  }, [sortedTracks]);
 
   if (!playlist.tracks.items.length) {
     return (

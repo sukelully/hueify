@@ -80,7 +80,7 @@ export async function getPlaylistTracks(
   return data.items;
 }
 
-// Get Spotify user ID
+// Get Spotify user ID - ARCHIVE
 export async function getUserId() {
   const accessToken = await getAccessToken();
 
@@ -104,9 +104,8 @@ export async function getUserId() {
   return data.id;
 }
 
-// Create public playlist
+// Create public playlist, returns playlist ID
 export async function createPlaylist(playlistName: string) {
-  const userId = await getUserId();
   const accessToken = await getAccessToken();
 
   const playlistData = {
@@ -114,7 +113,7 @@ export async function createPlaylist(playlistName: string) {
     description: 'Sorted by color with Hueify',
   };
 
-  const res = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
+  const res = await fetch(`https://api.spotify.com/v1/me/playlists`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -127,5 +126,28 @@ export async function createPlaylist(playlistName: string) {
     const text = await res.text();
     console.error('Spotify create playlist error:', text);
     throw new Error('Failed to create new playlist');
+  }
+
+  const data = await res.json();
+  return data.id;
+}
+
+// Add tracks to playlist
+export async function populatePlaylist(playlistId: string, tracks: string[]) {
+  const accessToken = await getAccessToken();
+
+  const res = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(tracks),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error('Spotify populate playlist error', text);
+    throw new Error('Failed to add tracks to playlist');
   }
 }
