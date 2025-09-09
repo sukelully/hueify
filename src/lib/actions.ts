@@ -2,6 +2,7 @@
 
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
+import { TrackObject, EpisodeObject } from '@/types/spotify/playlist';
 
 export async function getAccessToken(): Promise<string> {
   const tokenResponse = await auth.api.getAccessToken({
@@ -52,32 +53,40 @@ export async function getPlaylist(playlistId: string) {
   return data;
 }
 
-// Fetch specific playlist tracks
-export async function getPlaylistTracks(
-  playlistId: string,
-  offset: number = 0,
-  limit: number = 20,
-  additional_types: string = 'track'
-) {
+// Fetch all tracks from a specific playlist
+export async function getPlaylistTracks(playlistId: string, additional_types: string = 'track') {
   const accessToken = await getAccessToken();
+  const allTracks: (TrackObject | EpisodeObject)[] = [];
+  let offset = 0;
+  const limit = 100; // maximum allowed by Spotify
 
-  const res = await fetch(
-    `https://api.spotify.com/v1/playlists/${playlistId}/tracks?offset=${offset}&limit=${limit}&additional_types=${additional_types}`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+  while (true) {
+    const res = await fetch(
+      `https://api.spotify.com/v1/playlists/${playlistId}/tracks?offset=${offset}&limit=${limit}&additional_types=${additional_types}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('Spotify fetch error:', text);
+      throw new Error(`Failed to fetch tracks for playlist ${playlistId}`);
     }
-  );
 
-  if (!res.ok) {
-    const text = await res.text();
-    console.error('Spotify fetch error:', text);
-    throw new Error(`Failed to fetch tracks for playlist ${playlistId}`);
+    const data = await res.json();
+
+    // Extract only the tracks (filter out nulls)
+    const items = data.items?.map((item: any) => item.track).filter(Boolean) || [];
+    allTracks.push(...items);
+
+    if (!data.next) break; // no more pages
+    offset += limit; // move to the next page
   }
 
-  const data = await res.json();
-  return data.items;
+  return allTracks;
 }
 
 // Get Spotify user ID - ARCHIVE
@@ -133,21 +142,26 @@ export async function createPlaylist(playlistName: string) {
 }
 
 // Add tracks to playlist
-export async function populatePlaylist(playlistId: string, tracks: string[]) {
+export async function populatePlaylist(playlistId: string, uris: string[]) {
+  const CHUNK_SIZE = 100;
   const accessToken = await getAccessToken();
 
-  const res = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(tracks),
-  });
+  for (let i = 0; i < uris.length; i += CHUNK_SIZE) {
+    const chunk = uris.slice(i, i + CHUNK_SIZE);
 
-  if (!res.ok) {
-    const text = await res.text();
-    console.error('Spotify populate playlist error', text);
-    throw new Error('Failed to add tracks to playlist');
+    const res = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ uris: chunk }), // <-- append automatically
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('Spotify populate playlist error', text);
+      throw new Error('Failed to add tracks to playlist');
+    }
   }
 }

@@ -6,7 +6,7 @@ import NextImage from 'next/image';
 import ColorThief from 'colorthief';
 import { PlaylistResponse, TrackObject, EpisodeObject } from '@/types/spotify/playlist';
 import chroma from 'chroma-js';
-import { createPlaylist, populatePlaylist } from '@/lib/actions';
+import { createPlaylist, populatePlaylist, getPlaylistTracks } from '@/lib/actions';
 
 type ProcessedTrack = {
   track: TrackObject | EpisodeObject;
@@ -27,8 +27,8 @@ const BATCH_SIZE = 5;
 export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
   const [processedTracks, setProcessedTracks] = useState<ProcessedTrack[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [sortedTrackUris, setSortedTrackUris] = useState<string[]>([]);
   const [progress, setProgress] = useState(0);
+  const [totalTracks, setTotalTracks] = useState(0);
 
   const createNewPlaylist = async () => {
     const playlistName = `${playlist.name} hueify test`;
@@ -175,17 +175,15 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
   // Process tracks
   useEffect(() => {
     const processColors = async () => {
-      const tracks = playlist.tracks.items
-        .map((item) => item.track as TrackObject | EpisodeObject)
-        .filter(Boolean); // Remove any null/undefined tracks
-
+      const tracks = await getPlaylistTracks(playlist.id); // fetch ALL tracks
       if (tracks.length === 0) {
         setIsLoading(false);
         return;
       }
 
-      console.log(`Processing colors for ${tracks.length} tracks...`);
+      setTotalTracks(tracks.length);
 
+      console.log(`Processing colors for ${tracks.length} tracks...`);
       try {
         await processTracksInBatches(tracks);
         console.log('Color processing complete!');
@@ -197,23 +195,16 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
     };
 
     processColors();
-  }, [playlist.tracks.items]);
+  }, [playlist.id]);
 
-  // Extract track uris to array for populating new playlist
-  useEffect(() => {
-    if (sortedTracks.length > 0) {
-      const uris = sortedTracks
-        .map((item) => {
-          if ('uri' in item.track && item.track.uri) {
-            return item.track.uri;
-          }
-          return null;
-        })
-        .filter((uri): uri is string => uri !== null);
-
-      setSortedTrackUris(uris);
-    }
-  }, [sortedTracks]);
+  // Extract uris directly from sortedTracks
+  const sortedTrackUris = useMemo(
+    () =>
+      sortedTracks
+        .map((item) => ('uri' in item.track && item.track.uri ? item.track.uri : null))
+        .filter((uri): uri is string => uri !== null),
+    [sortedTracks]
+  );
 
   if (!playlist.tracks.items.length) {
     return (
@@ -238,20 +229,20 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
           onClick={createNewPlaylist}
           className="btn hover:bg-black-active active:bg-black-active cursor-pointer rounded-lg bg-black px-4 py-2 font-semibold text-white transition dark:bg-white dark:text-black"
         >
-          Create new playlist
+          Save playlist to Spotify
         </button>
 
         {isLoading && (
           <div className="flex flex-col items-center gap-2 text-gray-600">
             <div>Processing colors...</div>
             <div className="text-sm">
-              {progress} / {playlist.tracks.items.length} tracks
+              {progress} / {totalTracks} tracks
             </div>
-            <div className="h-2 w-64 rounded-full bg-gray-200">
+            <div className="flex w-[60%] justify-start">
               <div
-                className="h-2 rounded-full bg-blue-500 transition-all duration-300"
+                className="h-2 rounded-full bg-black transition-all duration-300 dark:bg-white"
                 style={{
-                  width: `${(progress / playlist.tracks.items.length) * 100}%`,
+                  width: `${(progress / totalTracks) * 100}%`,
                 }}
               />
             </div>
