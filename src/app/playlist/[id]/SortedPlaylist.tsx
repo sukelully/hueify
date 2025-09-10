@@ -72,7 +72,7 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
           clearTimeout(timeout);
           try {
             const dominantColor = thief.getColor(img) as [number, number, number];
-            const palette = (thief.getPalette(img) as [number, number, number][]) || [
+            const palette = (thief.getPalette(img, 5) as [number, number, number][]) || [
               dominantColor,
             ];
 
@@ -238,9 +238,9 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
             <div className="text-sm">
               {progress} / {totalTracks} tracks
             </div>
-            <div className="bg-secondary-text flex h-4 w-[60%] justify-start">
+            <div className="flex h-4 w-full justify-start rounded-full bg-gray-100 dark:bg-gray-800">
               <div
-                className="h-2 rounded-full bg-black transition-all duration-300 dark:bg-white"
+                className="h-full rounded-full bg-black transition-all duration-300 dark:bg-white"
                 style={{
                   width: `${(progress / totalTracks) * 100}%`,
                 }}
@@ -274,11 +274,19 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
                   />
                 </div>
 
-                {/* Color Swatch */}
                 <div
                   className="h-6 w-6 rounded-full border border-gray-300 shadow-sm"
                   style={{ backgroundColor: `rgb(${r}, ${g}, ${b})` }}
                 />
+                <div className="grid grid-cols-5">
+                  {item.colorPalette.map((color, index) => (
+                    <div
+                      key={index}
+                      className="h-4 w-4 rounded-full border border-gray-300"
+                      style={{ backgroundColor: `rgb(${color[0]}, ${color[1]}, ${color[2]})` }}
+                    />
+                  ))}
+                </div>
               </li>
             );
           })}
