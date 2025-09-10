@@ -167,8 +167,8 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
         return cB - cA;
       }
 
-      // Tertiary sort: Lightness - lighter first within same hue/chroma
-      return lB - lA;
+      // Tertiary sort: Lightness - darker first within same hue/chroma
+      return lA - lB;
     });
   }, [processedTracks]);
 
