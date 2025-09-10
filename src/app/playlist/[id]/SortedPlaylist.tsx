@@ -238,7 +238,7 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
             <div className="text-sm">
               {progress} / {totalTracks} tracks
             </div>
-            <div className="flex w-[60%] justify-start">
+            <div className="bg-secondary-text flex h-4 w-[60%] justify-start">
               <div
                 className="h-2 rounded-full bg-black transition-all duration-300 dark:bg-white"
                 style={{
