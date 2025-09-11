@@ -10,9 +10,10 @@ import { createPlaylist, populatePlaylist, getPlaylistTracks } from '@/lib/actio
 
 type ProcessedTrack = {
   track: TrackObject | EpisodeObject;
+  bestColor: [number, number, number];
   dominantColor: [number, number, number];
   colorPalette: [number, number, number][];
-  lch: [number, number, number]; // Pre-calculated for sorting
+  lch: [number, number, number];
 };
 
 type SortedPlaylistProps = {
@@ -26,36 +27,60 @@ const BATCH_SIZE = 5;
 
 export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
   const [processedTracks, setProcessedTracks] = useState<ProcessedTrack[]>([]);
+  const [manualColors, setManualColors] = useState<Record<string, [number, number, number]>>({});
+  const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [totalTracks, setTotalTracks] = useState(0);
 
+  // Save playlist
   const savePlaylist = async () => {
     const playlistName = `${playlist.name} hueify test`;
     const playlistId = await createPlaylist(playlistName);
     await populatePlaylist(playlistId, sortedTrackUris);
   };
 
-  // Extract artwork URL
+  // Best color selection
+  const selectBestColor = (
+    dominant: [number, number, number],
+    palette: [number, number, number][]
+  ): [number, number, number] => {
+    const getLCH = (rgb: [number, number, number]) => chroma(rgb).lch() as [number, number, number];
+    const [L, C] = getLCH(dominant);
+    const tooDark = L < 15;
+    const tooLight = L > 85;
+    const tooDull = C < 15;
+
+    if (!tooDark && !tooLight && !tooDull) return dominant;
+
+    const scored = palette.map((color) => {
+      const [l, c] = getLCH(color);
+      const distanceFromMid = Math.abs(l - 50);
+      const score = c * 2 - distanceFromMid;
+      return { color, score };
+    });
+
+    scored.sort((a, b) => b.score - a.score);
+    return scored.length > 0 ? scored[0].color : dominant;
+  };
+
   const getArtworkUrl = (track: TrackObject | EpisodeObject, index: number = 1): string => {
-    if (index < 0 || index > 2) {
-      throw new Error('Error: requested artwork index is out of range');
-    }
+    if (index < 0 || index > 2) throw new Error('Artwork index out of range');
     const images = 'album' in track ? track.album?.images : track.images;
-
     if (!images?.length) return FALLBACK_IMAGE;
-
-    // Prefer low resolution images for better performance
     return images[index]?.url || images[2]?.url || FALLBACK_IMAGE;
   };
 
-  // Process a single track's color data
-  const processTrackColor = async (
-    track: TrackObject | EpisodeObject,
-    thief: ColorThief
-  ): Promise<ProcessedTrack> => {
-    const artworkUrl = getArtworkUrl(track);
+  const getLCH = (rgb: [number, number, number]): [number, number, number] => {
+    try {
+      return chroma(rgb).lch() as [number, number, number];
+    } catch {
+      return [50, 0, 0];
+    }
+  };
 
+  const processTrackColor = async (track: TrackObject | EpisodeObject, thief: ColorThief) => {
+    const artworkUrl = getArtworkUrl(track);
     try {
       const img = new Image();
       img.crossOrigin = 'Anonymous';
@@ -64,53 +89,40 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
         dominantColor: [number, number, number];
         palette: [number, number, number][];
       }>((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          reject(new Error('Image load timeout'));
-        }, IMAGE_LOAD_TIMEOUT);
+        const timeout = setTimeout(
+          () => reject(new Error('Image load timeout')),
+          IMAGE_LOAD_TIMEOUT
+        );
 
         img.onload = () => {
           clearTimeout(timeout);
           try {
             const dominantColor = thief.getColor(img, 2) as [number, number, number];
-            const palette = (thief.getPalette(img, 5) as [number, number, number][]) || [
+            const palette = (thief.getPalette(img) as [number, number, number][]) || [
               dominantColor,
             ];
-
             resolve({ dominantColor, palette });
-          } catch (colorError) {
-            console.warn(`ColorThief failed for ${track.name}:`, colorError);
-            resolve({
-              dominantColor: FALLBACK_COLOR,
-              palette: [FALLBACK_COLOR],
-            });
+          } catch {
+            resolve({ dominantColor: FALLBACK_COLOR, palette: [FALLBACK_COLOR] });
           }
         };
 
         img.onerror = () => {
           clearTimeout(timeout);
-          console.warn(`Failed to load image for ${track.name}:`, artworkUrl);
-          resolve({
-            dominantColor: FALLBACK_COLOR,
-            palette: [FALLBACK_COLOR],
-          });
+          resolve({ dominantColor: FALLBACK_COLOR, palette: [FALLBACK_COLOR] });
         };
 
         img.src = artworkUrl;
       });
 
-      // Pre-calculate LCH for sorting
-      const lch = getLCH(dominantColor);
+      const bestColor = selectBestColor(dominantColor, palette);
+      const lch = getLCH(bestColor);
 
+      return { track, bestColor, dominantColor, colorPalette: palette, lch };
+    } catch {
       return {
         track,
-        dominantColor,
-        colorPalette: palette,
-        lch,
-      };
-    } catch (error) {
-      console.warn(`Error processing ${track.name}:`, error);
-      return {
-        track,
+        bestColor: FALLBACK_COLOR,
         dominantColor: FALLBACK_COLOR,
         colorPalette: [FALLBACK_COLOR],
         lch: getLCH(FALLBACK_COLOR),
@@ -118,77 +130,32 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
     }
   };
 
-  // Convert from RGB to LCH colors
-  const getLCH = (rgb: [number, number, number]): [number, number, number] => {
-    try {
-      return chroma(rgb).lch() as [number, number, number];
-    } catch {
-      return [50, 0, 0]; // Neutral gray fallback
-    }
-  };
-
-  // Process tracks in batches
   const processTracksInBatches = async (tracks: (TrackObject | EpisodeObject)[]) => {
     const thief = new ColorThief();
     const results: ProcessedTrack[] = [];
 
     for (let i = 0; i < tracks.length; i += BATCH_SIZE) {
       const batch = tracks.slice(i, i + BATCH_SIZE);
-
       const batchResults = await Promise.all(batch.map((track) => processTrackColor(track, thief)));
-
       results.push(...batchResults);
       setProgress(results.length);
-
-      // Update state after each batch for progressive loading
       setProcessedTracks([...results]);
     }
-
     return results;
   };
 
-  // Improved sorting with better hue handling
-  const sortedTracks = useMemo(() => {
-    return [...processedTracks].sort((a, b) => {
-      const [lA, cA, hA] = a.lch;
-      const [lB, cB, hB] = b.lch;
-
-      // Primary sort: Hue (with special handling for grayscale)
-      const hueA = isNaN(hA) || cA < 5 ? 360 : hA; // Put grayscale at end
-      const hueB = isNaN(hB) || cB < 5 ? 360 : hB;
-
-      if (Math.abs(hueA - hueB) > 15) {
-        // Increased tolerance for smoother transitions
-        return hueA - hueB;
-      }
-
-      // Secondary sort: Chroma (saturation) - more saturated first
-      if (Math.abs(cA - cB) > 10) {
-        return cB - cA;
-      }
-
-      // Tertiary sort: Lightness - lighter first within same hue/chroma
-      return lB - lA;
-    });
-  }, [processedTracks]);
-
-  // Process tracks
   useEffect(() => {
     const processColors = async () => {
-      const tracks = await getPlaylistTracks(playlist.id); // fetch ALL tracks
+      const tracks = await getPlaylistTracks(playlist.id);
+      setTotalTracks(tracks.length);
       if (tracks.length === 0) {
         setIsLoading(false);
         return;
       }
-
-      setTotalTracks(tracks.length);
-
-      console.log(`Processing colors for ${tracks.length} tracks...`);
       try {
         await processTracksInBatches(tracks);
-        console.log('Color processing complete!');
-      } catch (error) {
-        console.error('Error processing playlist colors:', error);
+      } catch {
+        console.error('Error processing playlist colors');
       } finally {
         setIsLoading(false);
       }
@@ -197,7 +164,22 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
     processColors();
   }, [playlist.id]);
 
-  // Extract uris directly from sortedTracks
+  const sortedTracks = useMemo(() => {
+    return [...processedTracks].sort((a, b) => {
+      const colorA = manualColors[a.track.id] || a.bestColor;
+      const colorB = manualColors[b.track.id] || b.bestColor;
+      const [lA, cA, hA] = getLCH(colorA);
+      const [lB, cB, hB] = getLCH(colorB);
+
+      const hueA = isNaN(hA) || cA < 5 ? 360 : hA;
+      const hueB = isNaN(hB) || cB < 5 ? 360 : hB;
+
+      if (Math.abs(hueA - hueB) > 15) return hueA - hueB;
+      if (Math.abs(cA - cB) > 10) return cB - cA;
+      return lB - lA;
+    });
+  }, [processedTracks, manualColors]);
+
   const sortedTrackUris = useMemo(
     () =>
       sortedTracks
@@ -206,31 +188,24 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
     [sortedTracks]
   );
 
-  if (!playlist.tracks.items.length) {
-    return (
-      <div className="relative min-h-screen p-4">
-        <DashboardChevron />
-        <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-          <h1 className="text-2xl font-semibold text-gray-700">
-            No tracks found in this playlist.
-          </h1>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="relative min-h-screen p-4">
       <DashboardChevron />
 
       <div className="flex flex-col items-center gap-6 pt-24 md:pt-28">
-        <h1 className="font-corben text-3xl font-bold md:text-4xl">{playlist.name}</h1>
-        <button
-          onClick={savePlaylist}
-          className="btn hover:bg-black-active active:bg-black-active cursor-pointer rounded-lg bg-black px-4 py-2 font-semibold text-white transition dark:bg-white dark:text-black"
-        >
-          Save playlist to Spotify
-        </button>
+        <h1 className="font-corben text-center text-3xl font-bold md:text-4xl">{playlist.name}</h1>
+        <p className="text-secondary-text text-center">
+          Click on a track to select a different color option.
+        </p>
+
+        <div className="flex gap-4">
+          <button
+            onClick={savePlaylist}
+            className="btn hover:bg-black-active rounded-lg bg-black px-4 py-2 text-white dark:bg-white dark:text-black"
+          >
+            Save playlist to Spotify
+          </button>
+        </div>
 
         {isLoading && (
           <div className="flex flex-col items-center gap-2 text-gray-600">
@@ -241,28 +216,23 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
             <div className="flex h-4 w-full justify-start rounded-full bg-gray-100 dark:bg-gray-800">
               <div
                 className="h-full rounded-full bg-black transition-all duration-300 dark:bg-white"
-                style={{
-                  width: `${(progress / totalTracks) * 100}%`,
-                }}
+                style={{ width: `${(progress / totalTracks) * 100}%` }}
               />
             </div>
           </div>
         )}
 
-        <ul className="scrollbar-thin scrollbar-thumb-gray-400 grid grid-cols-4 gap-4 overflow-y-auto px-4 pb-4">
+        <ul className="scrollbar-thin scrollbar-thumb-gray-400 grid grid-cols-3 gap-4 overflow-y-auto px-4 pb-4 md:grid-cols-4">
           {sortedTracks.map((item, index) => {
             const src = getArtworkUrl(item.track, 1);
             const title = item.track.name || 'Unknown Track';
-            const [r, g, b] = item.dominantColor;
-            const [L, C, H] = item.lch;
 
             return (
               <li
                 key={`${item.track.id}-${index}`}
-                className="flex flex-col items-center gap-2 rounded-lg bg-gray-100 p-2 transition-colors hover:bg-gray-200"
-                title={`${title} - RGB(${r}, ${g}, ${b}) - LCH(${L.toFixed(0)}, ${C.toFixed(0)}, ${H.toFixed(0)})`}
+                className="flex cursor-pointer flex-col items-center gap-2 rounded-lg bg-gray-100 p-2 transition-colors hover:bg-gray-200"
+                onClick={() => setActiveTrackId(item.track.id)}
               >
-                {/* Album Cover */}
                 <div className="relative h-24 w-24 md:h-32 md:w-32">
                   <NextImage
                     src={src}
@@ -273,24 +243,68 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
                     unoptimized
                   />
                 </div>
-
-                <div
-                  className="h-6 w-6 rounded-full border border-gray-300 shadow-sm"
-                  style={{ backgroundColor: `rgb(${r}, ${g}, ${b})` }}
-                />
-                <div className="grid grid-cols-5">
-                  {item.colorPalette.map((color, index) => (
-                    <div
-                      key={index}
-                      className="h-4 w-4 rounded-full border border-gray-300"
-                      style={{ backgroundColor: `rgb(${color[0]}, ${color[1]}, ${color[2]})` }}
-                    />
-                  ))}
-                </div>
               </li>
             );
           })}
         </ul>
+
+        {/* Palette Popup */}
+        {activeTrackId &&
+          (() => {
+            const track = processedTracks.find((t) => t.track.id === activeTrackId);
+            if (!track) return null;
+
+            const currentColor = manualColors[track.track.id] || track.bestColor;
+
+            return (
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+                onClick={() => setActiveTrackId(null)}
+              >
+                <div
+                  className="flex flex-col justify-center rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <h2 className="mb-4 text-center text-lg font-bold">{track.track.name}</h2>
+
+                  {/* Current Selected Color Display */}
+                  <div className="mb-4 flex items-center justify-center">
+                    <div
+                      className="h-12 w-12 rounded-full border border-gray-300"
+                      style={{
+                        backgroundColor: `rgb(${currentColor[0]}, ${currentColor[1]}, ${currentColor[2]})`,
+                      }}
+                    />
+                  </div>
+
+                  {/* Color Palette */}
+                  <div className="grid grid-cols-5 gap-2">
+                    {track.colorPalette.map((color, idx) => {
+                      const isSelected = currentColor.toString() === color.toString();
+                      return (
+                        <div
+                          key={idx}
+                          className={`h-6 w-6 rounded-full border ${isSelected ? 'border-black' : 'border-gray-300'} cursor-pointer`}
+                          style={{ backgroundColor: `rgb(${color[0]}, ${color[1]}, ${color[2]})` }}
+                          onClick={() => {
+                            setManualColors((prev) => ({ ...prev, [track.track.id]: color }));
+                            setActiveTrackId(null);
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    className="mt-4 rounded bg-gray-200 px-4 py-2 hover:bg-gray-300"
+                    onClick={() => setActiveTrackId(null)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
       </div>
     </div>
   );
