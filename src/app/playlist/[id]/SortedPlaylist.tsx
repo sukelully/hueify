@@ -189,23 +189,21 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
   );
 
   return (
-    <div className="relative min-h-screen p-4">
-      <DashboardChevron />
+    <div className="relative flex h-full w-fit flex-col items-center gap-4">
+      {/* <DashboardChevron /> */}
 
-      <div className="flex flex-col items-center gap-6 pt-24 md:pt-28">
-        <h1 className="font-corben text-center text-3xl font-bold md:text-4xl">{playlist.name}</h1>
+      <button
+        onClick={savePlaylist}
+        className="btn hover:bg-black-active w-fit rounded-lg bg-black px-4 py-2 text-white dark:bg-white dark:text-black"
+      >
+        Save playlist to Spotify
+      </button>
+
+      <div className="flex h-full flex-col items-center gap-6">
+        {/* <h1 className="font-corben text-center text-3xl font-bold md:text-4xl">{playlist.name}</h1>
         <p className="text-secondary-text text-center">
           Click on a track to select a different color option.
-        </p>
-
-        <div className="flex gap-4">
-          <button
-            onClick={savePlaylist}
-            className="btn hover:bg-black-active rounded-lg bg-black px-4 py-2 text-white dark:bg-white dark:text-black"
-          >
-            Save playlist to Spotify
-          </button>
-        </div>
+        </p> */}
 
         {isLoading && (
           <div className="flex flex-col items-center gap-2 text-gray-600">
@@ -296,7 +294,7 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
                   </div>
 
                   <button
-                    className="mt-4 rounded bg-gray-200 px-4 py-2 hover:bg-gray-300"
+                    className="mt-4 cursor-pointer rounded bg-gray-200 px-4 py-2 hover:bg-gray-300 active:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 dark:active:bg-gray-500"
                     onClick={() => setActiveTrackId(null)}
                   >
                     Cancel
