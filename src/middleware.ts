@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionCookie } from 'better-auth/cookies';
 
+// Routes middleware applies to
+export const config = {
+  matcher: ['/dashboard', '/playlist', '/'],
+};
+
 export async function middleware(req: NextRequest) {
   const sessionCookie = getSessionCookie(req);
 
@@ -12,8 +17,3 @@ export async function middleware(req: NextRequest) {
 
   return NextResponse.next();
 }
-
-export const config = {
-  // Routes middleware applies to
-  matcher: ['/dashboard', '/playlist'],
-};
