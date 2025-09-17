@@ -63,7 +63,7 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
   return (
     <div className="flex h-full w-full flex-col items-center">
       <div className="flex h-full w-full max-w-4xl flex-col">
-        <h1 className="font-corben mb-2 truncate px-8 text-center text-xl font-bold md:text-3xl">
+        <h1 className="font-corben z-10 mb-2 truncate px-12 text-center text-xl font-bold md:px-24 md:text-3xl">
           {playlist.name}
         </h1>
         <p className="text-secondary-text mb-2 px-12 text-center text-sm md:text-base">
@@ -95,7 +95,7 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
           })}
         </ul>
 
-        <div className="flex justify-center py-6 md:mb-8">
+        <div className="mb-8 flex justify-center py-6 sm:mb-0">
           <button
             onClick={savePlaylist}
             className="btn hover:bg-black-active w-fit rounded-lg bg-black px-4 py-2 text-white dark:bg-white dark:text-black"
