@@ -3,7 +3,7 @@ import { getSessionCookie } from 'better-auth/cookies';
 
 // Routes middleware applies to
 export const config = {
-  matcher: ['/dashboard', '/playlist', '/'],
+  matcher: ['/dashboard', '/playlist'],
 };
 
 export async function middleware(req: NextRequest) {
