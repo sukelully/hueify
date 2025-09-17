@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation'; // ✅ import router
 import NextImage from 'next/image';
 import { PlaylistResponse } from '@/types/spotify/playlist';
-import { useRouter } from 'next/navigation';
 import { createPlaylist, populatePlaylist } from '@/lib/actions';
 import LoadingScreen from '@/components/LoadingScreen';
 import { useProcessedTracks } from '@/hooks/useProcessedTracks';
@@ -16,13 +16,14 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
   const { processedTracks, isLoading, getArtworkUrl, getLCH } = useProcessedTracks(playlist.id);
   const [manualColors, setManualColors] = useState<Record<string, [number, number, number]>>({});
   const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
-  const router = useRouter();
+  const router = useRouter(); // ✅ hook for redirecting
 
   const savePlaylist = async () => {
     try {
       const playlistName = `${playlist.name} hueify test`;
       const playlistId = await createPlaylist(playlistName);
       await populatePlaylist(playlistId, sortedTrackUris);
+
       router.push('/dashboard');
     } catch (error) {
       console.error('Failed to save playlist:', error);

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { getPlaylist } from '@/lib/actions';
 import { redirect } from 'next/navigation';
 import { PlaylistResponse } from '@/types/spotify/playlist';
-import SortedPlaylist from './SortedPlaylist';
+import PlaylistClient from './PlaylistClient';
 
 type Params = {
   params: Promise<{ id: string }>;
@@ -26,7 +26,7 @@ export default async function PlaylistPage({ params }: Params) {
     <div className="relative flex h-screen flex-col items-center p-4">
       <DashboardChevron />
       <div className="mt-14 w-full flex-1 overflow-hidden md:mt-18">
-        <SortedPlaylist playlist={playlist} />
+        <PlaylistClient playlist={playlist} />
       </div>
     </div>
   );
