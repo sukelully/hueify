@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import NextImage from 'next/image';
-import { PlaylistResponse, TrackObject, EpisodeObject } from '@/types/spotify/playlist';
+import { PlaylistResponse } from '@/types/spotify/playlist';
 import { createPlaylist, populatePlaylist } from '@/lib/actions';
 import LoadingScreen from '@/components/LoadingScreen';
 import { useProcessedTracks } from '@/hooks/useProcessedTracks';
@@ -89,7 +89,7 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
           })}
         </ul>
 
-        <div className="flex justify-center py-4">
+        <div className="mb-8 flex justify-center py-6">
           <button
             onClick={savePlaylist}
             className="btn hover:bg-black-active w-fit rounded-lg bg-black px-4 py-2 text-white dark:bg-white dark:text-black"

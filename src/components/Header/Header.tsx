@@ -41,17 +41,18 @@ export default function Header() {
     <header className="from-header-grad to-background fixed top-0 left-0 z-10 w-full bg-gradient-to-b">
       <section className="flex items-center justify-between gap-4 px-6 py-3 lg:px-48">
         {/* Logo */}
-        <Link href="/" className="flex flex-row items-center gap-4">
-          <Image
+        <Link href="/" className="flex flex-col items-center">
+          {/* <Image
             src="/header/logo.png"
             alt="Hueify logo"
             width={32}
             height={32}
             className="object-contain"
-          />
+          /> */}
           <h1 className="font-corben relative bottom-[2px] scale-x-110 scale-y-90 transform text-3xl font-bold tracking-widest">
             hueify
           </h1>
+          <div className="h-1 w-full rounded-full bg-gradient-to-r from-[#9a6dc7] via-[#6c8ec7] to-[#6dc7bb] dark:from-[#7a4da7] dark:via-[#4c6ea7] dark:to-[#4da79b]"></div>
         </Link>
 
         {/* Right side (nav + auth) */}

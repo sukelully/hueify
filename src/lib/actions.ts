@@ -58,7 +58,7 @@ export async function getPlaylistTracks(playlistId: string, additional_types: st
   const accessToken = await getAccessToken();
   const allTracks: (TrackObject | EpisodeObject)[] = [];
   let offset = 0;
-  const limit = 100; // maximum allowed by Spotify
+  const limit = 100; // Max allowed by Spotify
 
   while (true) {
     const res = await fetch(
@@ -82,8 +82,8 @@ export async function getPlaylistTracks(playlistId: string, additional_types: st
     const items = data.items?.map((item: any) => item.track).filter(Boolean) || [];
     allTracks.push(...items);
 
-    if (!data.next) break; // no more pages
-    offset += limit; // move to the next page
+    if (!data.next) break; // No more pages
+    offset += limit; // Move to the next page
   }
 
   return allTracks;
