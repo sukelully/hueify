@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import NextImage from 'next/image';
 import { PlaylistResponse } from '@/types/spotify/playlist';
+import { useRouter } from 'next/navigation';
 import { createPlaylist, populatePlaylist } from '@/lib/actions';
 import LoadingScreen from '@/components/LoadingScreen';
 import { useProcessedTracks } from '@/hooks/useProcessedTracks';
@@ -15,12 +16,17 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
   const { processedTracks, isLoading, getArtworkUrl, getLCH } = useProcessedTracks(playlist.id);
   const [manualColors, setManualColors] = useState<Record<string, [number, number, number]>>({});
   const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
+  const router = useRouter();
 
-  // Save playlist (rudimentary)
   const savePlaylist = async () => {
-    const playlistName = `${playlist.name} hueify test`;
-    const playlistId = await createPlaylist(playlistName);
-    await populatePlaylist(playlistId, sortedTrackUris);
+    try {
+      const playlistName = `${playlist.name} hueify test`;
+      const playlistId = await createPlaylist(playlistName);
+      await populatePlaylist(playlistId, sortedTrackUris);
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Failed to save playlist:', error);
+    }
   };
 
   // Sort tracks by LCH hue
@@ -89,7 +95,7 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
           })}
         </ul>
 
-        <div className="mb-8 flex justify-center py-6">
+        <div className="flex justify-center py-6 md:mb-8">
           <button
             onClick={savePlaylist}
             className="btn hover:bg-black-active w-fit rounded-lg bg-black px-4 py-2 text-white dark:bg-white dark:text-black"
