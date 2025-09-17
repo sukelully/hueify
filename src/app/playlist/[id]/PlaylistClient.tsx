@@ -96,7 +96,7 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
           })}
         </ul>
 
-        <div className="mb-8 flex justify-center py-6 sm:mb-0">
+        <div className="mb-18 flex justify-center py-6 sm:mb-0">
           <button
             onClick={savePlaylist}
             className="btn hover:bg-black-active w-fit rounded-lg bg-black px-4 py-2 text-white dark:bg-white dark:text-black"

@@ -15,7 +15,7 @@ export default async function Dashboard() {
   // Fetch playlists
   let playlists: SimplifiedPlaylistObject[] = [];
   try {
-    playlists = await getUserPlaylists();
+    playlists = await getUserPlaylists(0, 48);
   } catch (error) {
     console.error(error);
     redirect('/error');
