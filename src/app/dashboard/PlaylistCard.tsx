@@ -7,8 +7,14 @@ interface PlaylistCardProps {
 }
 
 export default function PlaylistCard({ playlist }: PlaylistCardProps) {
+  const cardBackgroundClass = playlist.description.toLowerCase().includes('hueify')
+    ? 'bg-[#6dc7bb] dark:bg-[#7a4da7] active:bg-[#7bdbce] hover:bg-[#7bdbce] dark:hover:bg-[#9e6dcf] dark:active:bg-[#9e6dcf]'
+    : 'bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600';
+
   return (
-    <li className="flex cursor-pointer flex-col overflow-hidden rounded-lg bg-gray-200 transition duration-200 hover:scale-105 hover:bg-gray-300 active:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-600 dark:active:bg-slate-600">
+    <li
+      className={`flex cursor-pointer flex-col overflow-hidden rounded-lg transition duration-200 hover:scale-105 active:bg-gray-300 dark:active:bg-slate-600 ${cardBackgroundClass}`}
+    >
       <Link href={`/playlist/${playlist.id}`}>
         <div className="relative aspect-square w-full flex-shrink-0">
           <Image
