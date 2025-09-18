@@ -15,17 +15,20 @@ type Session = {
 export default function PlaylistsGrid({
   initialPlaylists,
   session,
+  initialLimit = 48,
 }: {
   initialPlaylists: SimplifiedPlaylistObject[];
   session: Session;
+  initialLimit?: number;
 }) {
   const [playlists, setPlaylists] = useState(initialPlaylists);
   const [offset, setOffset] = useState(0);
-  const limit = 20;
+  const [limit] = useState(initialLimit);
   const [isPending, startTransition] = useTransition();
 
   const handleOffsetPlaylists = (delta: number) => {
     const newOffset = offset + delta;
+    if (newOffset < 0) return; // prevent negative offset
     setOffset(newOffset);
 
     startTransition(async () => {
@@ -43,7 +46,6 @@ export default function PlaylistsGrid({
       try {
         const data = await getUserPlaylists(offset, limit);
         setPlaylists(data);
-        console.log(playlists);
       } catch (err) {
         console.error('Failed to fetch playlists', err);
       }
@@ -60,7 +62,7 @@ export default function PlaylistsGrid({
       <p className="text-secondary-text">Choose a playlist to get started.</p>
 
       <div className="mt-6 w-full max-w-5xl">
-        <ul className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <ul className="grid grid-cols-2 gap-4 md:grid-cols-6">
           {playlists.map((pl) => (
             <PlaylistCard key={pl.id} playlist={pl} />
           ))}
@@ -90,15 +92,18 @@ function ControlsRow({
   playlistsOffset: number;
   playlistsLimit: number;
   userPlaylistsLength: number;
-  onOffsetChange: (offset: number) => void;
+  onOffsetChange: (delta: number) => void;
   onRefresh: () => void;
   isPending: boolean;
 }) {
   return (
     <div className="mt-4 flex items-center justify-between">
+      {/* Previous button */}
       <button
-        className={`hover:bg-white-active active:bg-white-active cursor-pointer rounded-lg p-2 duration-300 ${playlistsOffset === 0 || isPending ? 'invisible' : ''}`}
-        onClick={() => onOffsetChange(-20)}
+        className={`hover:bg-white-active active:bg-white-active cursor-pointer rounded-lg p-2 duration-300 ${
+          playlistsOffset === 0 || isPending ? 'invisible' : ''
+        }`}
+        onClick={() => onOffsetChange(-playlistsLimit)}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -112,9 +117,12 @@ function ControlsRow({
         </svg>
       </button>
 
+      {/* Refresh button */}
       <button
         onClick={onRefresh}
-        className={`hover:bg-white-active active:bg-white-active cursor-pointer rounded-lg p-2 duration-300 ${isPending ? 'cursor-not-allowed opacity-50' : ''}`}
+        className={`hover:bg-white-active active:bg-white-active cursor-pointer rounded-lg p-2 duration-300 ${
+          isPending ? 'cursor-not-allowed opacity-50' : ''
+        }`}
         disabled={isPending}
       >
         <svg
@@ -127,9 +135,12 @@ function ControlsRow({
         </svg>
       </button>
 
+      {/* Next button */}
       <button
-        className={`hover:bg-white-active active:bg-white-active cursor-pointer rounded-lg p-2 duration-300 ${userPlaylistsLength !== playlistsLimit || isPending ? 'invisible' : ''}`}
-        onClick={() => onOffsetChange(20)}
+        className={`hover:bg-white-active active:bg-white-active cursor-pointer rounded-lg p-2 duration-300 ${
+          userPlaylistsLength <= playlistsLimit || isPending ? 'invisible' : ''
+        }`}
+        onClick={() => onOffsetChange(playlistsLimit)}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

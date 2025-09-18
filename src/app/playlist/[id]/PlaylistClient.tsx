@@ -1,31 +1,37 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import NextImage from 'next/image';
 import { PlaylistResponse } from '@/types/spotify/playlist';
-import { useRouter } from 'next/navigation';
 import { createPlaylist, populatePlaylist } from '@/lib/actions';
 import LoadingScreen from '@/components/LoadingScreen';
 import { useProcessedTracks } from '@/hooks/useProcessedTracks';
 
-type SortedPlaylistProps = {
+type PlaylistClientProps = {
   playlist: PlaylistResponse;
 };
 
-export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
+export default function PlaylistClient({ playlist }: PlaylistClientProps) {
   const { processedTracks, isLoading, getArtworkUrl, getLCH } = useProcessedTracks(playlist.id);
   const [manualColors, setManualColors] = useState<Record<string, [number, number, number]>>({});
   const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
 
+  // Save playlist to Spotify
   const savePlaylist = async () => {
+    setIsSaving(true);
     try {
       const playlistName = `${playlist.name} hueify test`;
       const playlistId = await createPlaylist(playlistName);
       await populatePlaylist(playlistId, sortedTrackUris);
+
       router.push('/dashboard');
     } catch (error) {
       console.error('Failed to save playlist:', error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -35,8 +41,8 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
       const artworkA = getArtworkUrl(a.track, 1);
       const artworkB = getArtworkUrl(b.track, 1);
 
-      const colorA = manualColors[artworkA] || a.bestColor;
-      const colorB = manualColors[artworkB] || b.bestColor;
+      const colorA = manualColors[artworkA] || a.dominantColor;
+      const colorB = manualColors[artworkB] || b.dominantColor;
 
       const [lA, cA, hA] = getLCH(colorA);
       const [lB, cB, hB] = getLCH(colorB);
@@ -58,12 +64,27 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
     [sortedTracks]
   );
 
-  if (isLoading) return <LoadingScreen />;
+  if (isLoading || isSaving)
+    return <LoadingScreen message={isSaving ? 'Saving playlist...' : null} />;
+
+  if (playlist.tracks.items.length < 30) {
+    return (
+      <div className="mt-14 flex h-full w-full flex-col items-center justify-center p-4 md:mt-1">
+        <div className="flex max-w-md flex-col items-center text-center">
+          <h1 className="font-corben mb-4 text-xl font-bold">Give me something to work with...</h1>
+          <p className="text-sm text-gray-600 md:text-base dark:text-gray-400">
+            Playlists need at least 30 tracks to create a proper color arrangement. Add more songs
+            and try again!
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex h-full w-full flex-col items-center">
+    <div className="mt-12 flex h-full w-full flex-col items-center p-4">
       <div className="flex h-full w-full max-w-4xl flex-col">
-        <h1 className="font-corben z-10 mb-2 truncate px-12 text-center text-xl font-bold md:px-24 md:text-3xl">
+        <h1 className="font-corben px-12 text-center text-xl font-bold md:px-24 md:text-3xl">
           {playlist.name}
         </h1>
         <p className="text-secondary-text mb-2 px-12 text-center text-sm md:text-base">
@@ -95,7 +116,7 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
           })}
         </ul>
 
-        <div className="mb-8 flex justify-center py-6 sm:mb-0">
+        <div className="mb-20 flex justify-center py-6 md:mb-16">
           <button
             onClick={savePlaylist}
             className="btn hover:bg-black-active w-fit rounded-lg bg-black px-4 py-2 text-white dark:bg-white dark:text-black"
@@ -112,7 +133,7 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
           if (!track) return null;
 
           const artwork = getArtworkUrl(track.track, 1);
-          const currentColor = manualColors[artwork] || track.bestColor;
+          const currentColor = manualColors[artwork] || track.dominantColor;
 
           return (
             <div

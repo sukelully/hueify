@@ -89,30 +89,6 @@ export async function getPlaylistTracks(playlistId: string, additional_types: st
   return allTracks;
 }
 
-// Get Spotify user ID - ARCHIVE
-export async function getUserId() {
-  const accessToken = await getAccessToken();
-
-  const res = await fetch(
-    `
-    https://api.spotify.com/v1/me`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  );
-
-  if (!res.ok) {
-    const text = await res.text();
-    console.error('Spotify fetch error:', text);
-    throw new Error('Failed to fetch Spotify user ID');
-  }
-
-  const data = await res.json();
-  return data.id;
-}
-
 // Create public playlist, returns playlist ID
 export async function createPlaylist(playlistName: string) {
   const accessToken = await getAccessToken();

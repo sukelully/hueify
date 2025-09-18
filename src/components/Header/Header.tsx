@@ -32,10 +32,7 @@ export default function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const navItems = [
-    { href: '/about', label: 'About' },
-    { href: '/', label: 'Test' },
-  ];
+  const navItems = [{ href: '/help', label: 'Help & FAQ' }];
 
   return (
     <header className="from-header-grad to-background fixed top-0 left-0 z-10 w-full bg-gradient-to-b">
