@@ -23,9 +23,9 @@ export default async function PlaylistPage({ params }: Params) {
   const playlist: PlaylistResponse = await getPlaylist(id);
 
   return (
-    <div className="relative flex h-screen flex-col items-center p-4">
+    <div className="relative flex h-screen flex-col items-center">
       <DashboardChevron />
-      <div className="mt-14 w-full flex-1 overflow-hidden md:mt-18">
+      <div className="w-full flex-1 overflow-hidden">
         <PlaylistClient playlist={playlist} />
       </div>
     </div>
@@ -36,7 +36,7 @@ function DashboardChevron() {
   return (
     <Link
       href="/dashboard"
-      className="hover:bg-white-active active:bg-white-active bg-background fixed top-18 left-4 z-5 cursor-pointer rounded-lg p-2 transition-colors duration-300 md:top-20"
+      className="hover:bg-white-active active:bg-white-active bg-background fixed top-18 left-4 z-10 cursor-pointer rounded-lg p-2 transition-colors duration-300 md:top-20"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

@@ -8,17 +8,20 @@ import { createPlaylist, populatePlaylist } from '@/lib/actions';
 import LoadingScreen from '@/components/LoadingScreen';
 import { useProcessedTracks } from '@/hooks/useProcessedTracks';
 
-type SortedPlaylistProps = {
+type PlaylistClientProps = {
   playlist: PlaylistResponse;
 };
 
-export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
+export default function PlaylistClient({ playlist }: PlaylistClientProps) {
   const { processedTracks, isLoading, getArtworkUrl, getLCH } = useProcessedTracks(playlist.id);
   const [manualColors, setManualColors] = useState<Record<string, [number, number, number]>>({});
   const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
-  const router = useRouter(); // ✅ hook for redirecting
+  const [isSaving, setIsSaving] = useState(false);
+  const router = useRouter();
 
+  // Save playlist to Spotify
   const savePlaylist = async () => {
+    setIsSaving(true);
     try {
       const playlistName = `${playlist.name} hueify test`;
       const playlistId = await createPlaylist(playlistName);
@@ -27,6 +30,8 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
       router.push('/dashboard');
     } catch (error) {
       console.error('Failed to save playlist:', error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -59,12 +64,26 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
     [sortedTracks]
   );
 
-  if (isLoading) return <LoadingScreen />;
+  if (isLoading || isSaving)
+    return <LoadingScreen message={isSaving ? 'Saving playlist...' : null} />;
+
+  if (playlist.tracks.items.length < 30) {
+    return (
+      <div className="mt-14 flex w-full flex-col items-center p-4 md:mt-1">
+        <h1 className="font-corben text-center text-xl font-bold">
+          Give me something to work with...
+        </h1>
+        <p className="mb-2 px-12 py-12 text-center text-sm md:text-base">
+          Track seem out of place? Tap on it to select a better color option.
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex h-full w-full flex-col items-center">
+    <div className="mt-14 flex h-full w-full flex-col items-center p-4 md:mt-1">
       <div className="flex h-full w-full max-w-4xl flex-col">
-        <h1 className="font-corben z-10 mb-2 truncate px-12 text-center text-xl font-bold md:px-24 md:text-3xl">
+        <h1 className="font-corben px-12 text-center text-xl font-bold md:px-24 md:text-3xl">
           {playlist.name}
         </h1>
         <p className="text-secondary-text mb-2 px-12 text-center text-sm md:text-base">
@@ -96,7 +115,7 @@ export default function SortedPlaylist({ playlist }: SortedPlaylistProps) {
           })}
         </ul>
 
-        <div className="mb-18 flex justify-center py-6 sm:mb-0">
+        <div className="mb-20 flex justify-center py-6 sm:mb-4">
           <button
             onClick={savePlaylist}
             className="btn hover:bg-black-active w-fit rounded-lg bg-black px-4 py-2 text-white dark:bg-white dark:text-black"
