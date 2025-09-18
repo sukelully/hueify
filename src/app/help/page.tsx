@@ -9,7 +9,7 @@ export default function HelpPage() {
           <p className="text-gray-700 dark:text-gray-300">
             Hueify lets you sort your Spotify playlists by the{' '}
             <span className="font-medium">dominant colors </span>
-            of their tracks`&apos; album artwork and sorts them using the LCH hue color wheel
+            of their tracks&apos; album artwork and sorts them using the LCH hue color wheel
             (0-360).
           </p>
         </section>
@@ -29,7 +29,7 @@ export default function HelpPage() {
           <h2 className="text-xl font-semibold">How do I use it?</h2>
           <ol className="list-inside list-decimal space-y-2 text-gray-700 dark:text-gray-300">
             <li>Log in with your Spotify account.</li>
-            <li>Select a playlist you`&apos;d like to sort.</li>
+            <li>Select a playlist you&apos;d like to sort.</li>
             <li>Fine-tune your playlist by selecting the best color option for each track.</li>
             <li>Save your new sorted playlist to Spotify.</li>
           </ol>
@@ -45,7 +45,7 @@ export default function HelpPage() {
             >
               luke@sukelully.dev
             </a>
-            &nbsp;and I`&apos;ll get back to you!
+            &nbsp;and I&apos;ll get back to you!
           </p>
         </section>
       </div>

@@ -6,7 +6,6 @@ import { getPlaylistTracks } from '@/lib/actions';
 
 type ProcessedTrack = {
   track: TrackObject | EpisodeObject;
-  bestColor: [number, number, number];
   dominantColor: [number, number, number];
   colorPalette: [number, number, number][];
   lch: [number, number, number];
@@ -26,32 +25,6 @@ export function useProcessedTracks(playlistId: string) {
       console.warn('Could not convert to LCH format');
       return [50, 0, 0];
     }
-  };
-
-  // Attempt to select best color, RGB input
-  const selectBestColor = (
-    dominant: [number, number, number],
-    palette: [number, number, number][]
-  ): [number, number, number] => {
-    const [L, C] = getLCH(dominant);
-    const tooDark = L < 10;
-    const tooLight = L > 90;
-    const tooDull = C < 10;
-
-    // Use dominant if (potentially) suitable
-    if (!tooDark && !tooLight && !tooDull) return dominant;
-
-    // Use the next most vivid, moderately bright color
-    const scored = palette.map((color) => {
-      const [l, c] = getLCH(color);
-      const distanceFromMid = Math.abs(l - 50);
-      const score = c * 2 - distanceFromMid;
-
-      return { color, score };
-    });
-
-    scored.sort((a, b) => b.score - a.score);
-    return scored.length > 0 ? scored[0].color : dominant;
   };
 
   // Get artwork src for track and episode objects
@@ -110,15 +83,13 @@ export function useProcessedTracks(playlistId: string) {
         img.src = artworkUrl;
       });
 
-      const bestColor = selectBestColor(dominantColor, palette);
-      const lch = getLCH(bestColor);
+      const lch = getLCH(dominantColor);
 
-      return { track, bestColor, dominantColor, colorPalette: palette, lch };
+      return { track, dominantColor, colorPalette: palette, lch };
     } catch {
       console.error(`Image load timeout or unexpected error for ${track.name}, fallback used`);
       return {
         track,
-        bestColor: FALLBACK_COLOR,
         dominantColor: FALLBACK_COLOR,
         colorPalette: [FALLBACK_COLOR],
         lch: getLCH(FALLBACK_COLOR),
