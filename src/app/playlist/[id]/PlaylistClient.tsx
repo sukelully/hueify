@@ -85,7 +85,7 @@ export default function PlaylistClient({ playlist }: PlaylistClientProps) {
     <div className="mt-12 flex h-full w-full flex-col items-center p-4">
       <div className="flex h-full w-full max-w-4xl flex-col">
         <h1 className="font-corben px-12 text-center text-xl font-bold md:px-24 md:text-3xl">
-          {playlist.name}
+          {playlist.name}https://i.scdn.co/image/ab67616d00001e025cb564fd6b794f01265a1394
         </h1>
         <p className="text-secondary-text mb-2 px-12 text-center text-sm md:text-base">
           Track seem out of place? Tap on it to select a better color option.

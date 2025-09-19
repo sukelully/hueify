@@ -41,6 +41,8 @@ export default function PlaylistsGrid({
     });
   };
 
+  console.log(playlists.length);
+
   const refetch = () => {
     startTransition(async () => {
       try {
@@ -138,7 +140,7 @@ function ControlsRow({
       {/* Next button */}
       <button
         className={`hover:bg-white-active active:bg-white-active cursor-pointer rounded-lg p-2 duration-300 ${
-          userPlaylistsLength <= playlistsLimit || isPending ? 'invisible' : ''
+          userPlaylistsLength < playlistsLimit || isPending ? 'invisible' : ''
         }`}
         onClick={() => onOffsetChange(playlistsLimit)}
       >
