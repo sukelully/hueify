@@ -23,7 +23,7 @@ export default function PlaylistClient({ playlist }: PlaylistClientProps) {
   const savePlaylist = async () => {
     setIsSaving(true);
     try {
-      const playlistName = `${playlist.name} hueify test`;
+      const playlistName = `${playlist.name} (Hueify)`;
       const playlistId = await createPlaylist(playlistName);
       await populatePlaylist(playlistId, sortedTrackUris);
 

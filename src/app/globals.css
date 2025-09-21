@@ -83,3 +83,23 @@ body {
     content: url('/spotify/spotify-black.png');
   }
 }
+
+.hero-bg {
+  height: 100%;
+  width: 100%;
+  background-image: url('/home/hero-image.webp');
+  background-size: auto 100%;
+  background-repeat: repeat-x;
+  background-position: 0 center;
+  animation: pingpong 12s infinite alternate;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); /* slow at peaks */
+}
+
+@keyframes pingpong {
+  0% {
+    background-position-x: 0%;
+  }
+  100% {
+    background-position-x: 100%;
+  }
+}

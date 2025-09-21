@@ -5,7 +5,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Hueify',
-  description: 'Sort Spotify playlists by color',
+  description: 'Sort your Spotify playlists by color!',
 };
 
 export default async function RootLayout({
@@ -17,6 +17,11 @@ export default async function RootLayout({
     <html lang="en" className="min-w-[280px] md:scroll-smooth">
       <head>
         <meta name="apple-mobile-web-app-title" content="Hueify" />
+        <script
+          defer
+          src="https://cloud.umami.is/script.js"
+          data-website-id="fa7f704c-1386-437d-8814-9a13f0ed03bd"
+        ></script>
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${corben.variable} antialiased`}

@@ -14,7 +14,30 @@ export default async function Home() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4 sm:px-16">
-      <SignInBtn isLogo />
+      {/* Hero Section */}
+      <div className="relative h-60 w-full overflow-hidden md:h-96">
+        <div className="hero-bg" />
+
+        {/* Gradient overlay for fade edges */}
+        <div className="from-background pointer-events-none absolute inset-0 bg-gradient-to-r to-transparent to-5%"></div>
+        <div className="from-background pointer-events-none absolute inset-0 bg-gradient-to-l to-transparent to-5%"></div>
+      </div>
+
+      <div className="mt-8 max-w-xl">
+        <p className="text-gray-800 md:text-xl dark:text-gray-200">
+          Add a little{' '}
+          <span className="relative font-bold">
+            hue
+            <span className="absolute bottom-0 left-0 h-1 w-full rounded-full bg-gradient-to-r from-[#9a6dc7] via-[#6c8ec7] to-[#6dc7bb] dark:from-[#7a4da7] dark:via-[#4c6ea7] dark:to-[#4da79b]"></span>
+          </span>{' '}
+          to your playlists.
+        </p>
+      </div>
+
+      {/* Sign-in Button */}
+      <div className="mt-8">
+        <SignInBtn isLogo />
+      </div>
     </div>
   );
 }

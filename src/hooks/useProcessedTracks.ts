@@ -36,6 +36,7 @@ export function useProcessedTracks(playlistId: string) {
     const images = 'album' in track ? track.album?.images : track.images;
     if (!images?.length) return FALLBACK_IMAGE;
 
+    console.log(images[1]?.url);
     return images[index]?.url || images[2]?.url || FALLBACK_IMAGE;
   };
 
