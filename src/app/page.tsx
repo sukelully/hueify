@@ -17,6 +17,10 @@ export default async function Home() {
       {/* Hero Section */}
       <div className="relative h-60 w-full overflow-hidden md:h-96">
         <div className="hero-bg" />
+
+        {/* Gradient overlay for fade edges */}
+        <div className="from-background pointer-events-none absolute inset-0 bg-gradient-to-r to-transparent to-5%"></div>
+        <div className="from-background pointer-events-none absolute inset-0 bg-gradient-to-l to-transparent to-5%"></div>
       </div>
 
       <div className="mt-8 max-w-xl">
