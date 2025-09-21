@@ -85,20 +85,21 @@ body {
 }
 
 .hero-bg {
-  width: 200%; /* duplicate width for seamless scroll */
   height: 100%;
+  width: 100%;
   background-image: url('/home/hero-image.webp');
-  background-size: auto 100%; /* scale height to container, keep full album visible */
-  background-repeat: repeat-x; /* repeat horizontally for seamless scrolling */
-  background-position: left center;
-  animation: scroll 30s linear infinite;
+  background-size: auto 100%;
+  background-repeat: repeat-x;
+  background-position: 0 center;
+  animation: pingpong 12s infinite alternate;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); /* slow at peaks */
 }
 
-@keyframes scroll {
+@keyframes pingpong {
   0% {
-    transform: translateX(0);
+    background-position-x: 0%;
   }
   100% {
-    transform: translateX(-50%);
+    background-position-x: 100%;
   }
 }
