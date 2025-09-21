@@ -144,7 +144,12 @@ export default function PlaylistClient({ playlist }: PlaylistClientProps) {
                 className="flex flex-col justify-center rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800"
                 onClick={(e) => e.stopPropagation()}
               >
-                <h2 className="mb-4 text-center text-lg font-bold">{track.track.name}</h2>
+                <h2 className="mb-2 text-center text-lg font-bold">{track.track.name}</h2>
+                {'artists' in track.track && track.track.artists ? (
+                  <p className="text-secondary-text mb-2 text-center text-sm">
+                    {track.track.artists.map((artist) => artist.name).join(', ')}
+                  </p>
+                ) : null}
 
                 {/* Current Selected Color Display */}
                 <div className="mb-4 flex items-center justify-center">
@@ -163,7 +168,9 @@ export default function PlaylistClient({ playlist }: PlaylistClientProps) {
                     return (
                       <div
                         key={idx}
-                        className={`h-6 w-6 rounded-full border ${isSelected ? 'border-black' : 'border-gray-300'} cursor-pointer`}
+                        className={`h-6 w-6 rounded-full border ${
+                          isSelected ? 'border-black' : 'border-gray-300'
+                        } cursor-pointer`}
                         style={{ backgroundColor: `rgb(${color[0]}, ${color[1]}, ${color[2]})` }}
                         onClick={() => {
                           setManualColors((prev) => ({ ...prev, [artwork]: color }));
@@ -174,8 +181,18 @@ export default function PlaylistClient({ playlist }: PlaylistClientProps) {
                   })}
                 </div>
 
+                {/* Open in Spotify Button */}
+                <a
+                  href={`https://open.spotify.com/track/${track.track.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-background hover:bg-black-active active:bg-black-active mt-4 cursor-pointer rounded-lg bg-black px-4 py-2 text-center font-bold duration-300 dark:bg-white"
+                >
+                  Open in Spotify
+                </a>
+
                 <button
-                  className="mt-4 cursor-pointer rounded bg-gray-200 px-4 py-2 duration-300 hover:bg-gray-300 active:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 dark:active:bg-gray-500"
+                  className="mt-2 cursor-pointer rounded-lg bg-gray-200 px-4 py-2 duration-300 hover:bg-gray-300 active:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 dark:active:bg-gray-500"
                   onClick={() => setActiveTrackId(null)}
                 >
                   Cancel

@@ -38,6 +38,19 @@ export default async function Home() {
       <div className="mt-8">
         <SignInBtn isLogo />
       </div>
+
+      <div className="mt-6 max-w-xl">
+        <p className="text-center text-gray-800 dark:text-gray-200">
+          Hueify is currently in developer mode. Please email{' '}
+          <a
+            href="mailto:luke@sukelully.dev"
+            className="text-blue-600 underline dark:text-blue-400"
+          >
+            luke@sukelully.dev
+          </a>{' '}
+          to request access.
+        </p>
+      </div>
     </div>
   );
 }
