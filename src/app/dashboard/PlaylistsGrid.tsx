@@ -41,8 +41,6 @@ export default function PlaylistsGrid({
     });
   };
 
-  console.log(playlists.length);
-
   const refetch = () => {
     startTransition(async () => {
       try {

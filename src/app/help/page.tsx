@@ -1,6 +1,6 @@
 export default function HelpPage() {
   return (
-    <div className="relative mt-6 flex h-screen flex-col items-center overflow-y-auto px-6 py-12">
+    <div className="relative flex h-screen flex-col items-center overflow-y-auto px-6 pt-16">
       <div className="w-full max-w-3xl space-y-8">
         <h1 className="font-corben text-center text-3xl font-bold">Help & FAQ</h1>
 

@@ -4,6 +4,25 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { TrackObject, EpisodeObject } from '@/types/spotify/playlist';
 
+// Wrapper for fetch that handles Spotify rate limits (429)
+async function spotifyFetch(url: string, options: RequestInit, maxRetries = 3): Promise<Response> {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const res = await fetch(url, options);
+
+    if (res.status === 429) {
+      const retryAfter = parseInt(res.headers.get('Retry-After') || '1', 10);
+      console.warn(`Rate limited (attempt ${attempt + 1}). Retrying after ${retryAfter}s...`);
+      await new Promise((r) => setTimeout(r, retryAfter * 1000));
+      continue;
+    }
+
+    return res;
+  }
+
+  throw new Error(`Spotify API rate limit exceeded after ${maxRetries} retries`);
+}
+
+// Get Spotify access token
 export async function getAccessToken(): Promise<string> {
   const tokenResponse = await auth.api.getAccessToken({
     body: { providerId: 'spotify' },
@@ -16,30 +35,32 @@ export async function getAccessToken(): Promise<string> {
 }
 
 // Fetch user's playlists
-export async function getUserPlaylists(offset: number = 0, limit: number = 20) {
+export async function getUserPlaylists(offset = 0, limit = 20) {
   const accessToken = await getAccessToken();
 
-  const res = await fetch(
+  const res = await spotifyFetch(
     `https://api.spotify.com/v1/me/playlists?offset=${offset}&limit=${limit}`,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
+      next: { revalidate: 60 },
     }
   );
 
-  if (!res.ok) throw new Error('Failed to fetch Spotify playlists');
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to fetch Spotify playlists: ${text}`);
+  }
 
   const data = await res.json();
   return data.items;
 }
 
-// Fetch playlist
+// Fetch playlist info
 export async function getPlaylist(playlistId: string) {
   const accessToken = await getAccessToken();
 
-  const res = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+  const res = await spotifyFetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
     next: { revalidate: 3600 },
   });
 
@@ -49,25 +70,20 @@ export async function getPlaylist(playlistId: string) {
     throw new Error(`Failed to fetch playlist ${playlistId}`);
   }
 
-  const data = await res.json();
-  return data;
+  return await res.json();
 }
 
-// Fetch all tracks from a specific playlist
-export async function getPlaylistTracks(playlistId: string, additional_types: string = 'track') {
+// Fetch all tracks from a playlist
+export async function getPlaylistTracks(playlistId: string, additional_types = 'track') {
   const accessToken = await getAccessToken();
   const allTracks: (TrackObject | EpisodeObject)[] = [];
   let offset = 0;
-  const limit = 100; // Max allowed by Spotify
+  const limit = 100;
 
   while (true) {
-    const res = await fetch(
+    const res = await spotifyFetch(
       `https://api.spotify.com/v1/playlists/${playlistId}/tracks?offset=${offset}&limit=${limit}&additional_types=${additional_types}`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
+      { headers: { Authorization: `Bearer ${accessToken}` } }
     );
 
     if (!res.ok) {
@@ -77,34 +93,30 @@ export async function getPlaylistTracks(playlistId: string, additional_types: st
     }
 
     const data = await res.json();
-
-    // Extract only the tracks (filter out nulls)
     const items = data.items?.map((item: any) => item.track).filter(Boolean) || [];
     allTracks.push(...items);
 
-    if (!data.next) break; // No more pages
-    offset += limit; // Move to the next page
+    if (!data.next) break;
+    offset += limit;
   }
 
   return allTracks;
 }
 
-// Create public playlist, returns playlist ID
+// Create a new public playlist
 export async function createPlaylist(playlistName: string) {
   const accessToken = await getAccessToken();
 
-  const playlistData = {
-    name: playlistName,
-    description: 'Sorted by color with Hueify',
-  };
-
-  const res = await fetch(`https://api.spotify.com/v1/me/playlists`, {
+  const res = await spotifyFetch(`https://api.spotify.com/v1/me/playlists`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(playlistData),
+    body: JSON.stringify({
+      name: playlistName,
+      description: 'Sorted by color with Hueify.',
+    }),
   });
 
   if (!res.ok) {
@@ -117,7 +129,7 @@ export async function createPlaylist(playlistName: string) {
   return data.id;
 }
 
-// Add tracks to playlist
+// Add tracks to a playlist, handling 429 per chunk
 export async function populatePlaylist(playlistId: string, uris: string[]) {
   const CHUNK_SIZE = 100;
   const accessToken = await getAccessToken();
@@ -125,13 +137,13 @@ export async function populatePlaylist(playlistId: string, uris: string[]) {
   for (let i = 0; i < uris.length; i += CHUNK_SIZE) {
     const chunk = uris.slice(i, i + CHUNK_SIZE);
 
-    const res = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+    const res = await spotifyFetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ uris: chunk }), // <-- append automatically
+      body: JSON.stringify({ uris: chunk }),
     });
 
     if (!res.ok) {
