@@ -41,7 +41,7 @@ export default async function Home() {
 
       <div className="mt-6 max-w-xl">
         <p className="text-center text-gray-800 dark:text-gray-200">
-          Hueify is currently in developer mode. Please email{' '}
+          Hueify is currently in developer mode. Please contact{' '}
           <a
             href="mailto:luke@sukelully.dev"
             className="text-blue-600 underline dark:text-blue-400"
