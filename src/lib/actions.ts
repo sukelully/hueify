@@ -130,7 +130,7 @@ export async function createPlaylist(playlistName: string) {
   return data.id;
 }
 
-// Add tracks to a playlist, handling 429 per chunk
+// Add tracks to a playlist, handling code 429 per chunk
 export async function populatePlaylist(playlistId: string, uris: string[]) {
   const CHUNK_SIZE = 100;
   const accessToken = await getHueifyAccessToken();
