@@ -27,7 +27,8 @@ export default function PlaylistClient({ playlist }: PlaylistClientProps) {
       const playlistId = await createPlaylist(playlistName);
       await populatePlaylist(playlistId, sortedTrackUris);
 
-      router.push('/dashboard');
+      window.open(`https://open.spotify.com/playlist/${playlistId}`, '_blank');
+      router.push('/');
     } catch (error) {
       console.error('Failed to save playlist:', error);
     } finally {

@@ -1,6 +1,9 @@
 // import PlaylistClient from './SortedPlaylist';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
 import Link from 'next/link';
 import { getPlaylist } from '@/lib/actions';
+import { redirect } from 'next/navigation';
 import { PlaylistResponse } from '@/types/spotify/playlist';
 import PlaylistClient from './PlaylistClient';
 
@@ -10,6 +13,12 @@ type Params = {
 
 export default async function PlaylistPage({ params }: Params) {
   const { id } = await params;
+
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) return redirect('/signin');
 
   const playlist: PlaylistResponse = await getPlaylist(id);
 
@@ -26,7 +35,7 @@ export default async function PlaylistPage({ params }: Params) {
 function DashboardChevron() {
   return (
     <Link
-      href="/"
+      href="/dashboard"
       className="hover:bg-white-active active:bg-white-active bg-background fixed top-18 left-4 z-10 cursor-pointer rounded-lg p-2 transition-colors duration-300 md:top-20 md:left-12"
     >
       <svg

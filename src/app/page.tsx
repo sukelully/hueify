@@ -1,15 +1,20 @@
-import SignInBtn from '@/components/SignInBtn';
-import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
-import { redirect } from 'next/navigation';
+'use client';
 
-export default async function Home() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-  if (session) {
-    redirect('/dashboard');
+export default function Home() {
+  const [inputValue, setInputValue] = useState('');
+  const router = useRouter();
+
+  function extractPlaylistId() {
+    const match = inputValue.match(/playlist\/([a-zA-Z0-9]+)(\?|$)/);
+    if (!match) {
+      alert('Invalid Spotify playlist URL');
+      return;
+    }
+    const playlistId = match[1];
+    router.push(`/playlist/${playlistId}`);
   }
 
   return (
@@ -34,22 +39,22 @@ export default async function Home() {
         </p>
       </div>
 
-      {/* Sign-in Button */}
       <div className="mt-8">
-        <SignInBtn isLogo />
-      </div>
-
-      <div className="mt-6 max-w-xl">
-        <p className="text-center text-gray-800 dark:text-gray-200">
-          Hueify is currently in developer mode. Please email{' '}
-          <a
-            href="mailto:luke@sukelully.dev"
-            className="text-blue-600 underline dark:text-blue-400"
+        <div className="flex overflow-hidden rounded-full border border-gray-300 transition-all focus-within:border-black focus-within:ring-2 focus-within:ring-black/20">
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            className="flex-1 border-none bg-white px-4 py-3 text-gray-900 placeholder-gray-500 outline-none"
+            placeholder="Enter Spotify playlist link"
+          />
+          <button
+            onClick={extractPlaylistId}
+            className="cursor-pointer bg-black px-6 py-3 font-semibold whitespace-nowrap text-white transition-colors duration-200 hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-100"
           >
-            luke@sukelully.dev
-          </a>{' '}
-          to request access.
-        </p>
+            Submit
+          </button>
+        </div>
       </div>
     </div>
   );

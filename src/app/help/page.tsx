@@ -14,7 +14,7 @@ export default function HelpPage() {
           </p>
         </section>
 
-        <section className="space-y-3">
+        {/* <section className="space-y-3">
           <h2 className="text-xl font-semibold">
             Why do I need to give Hueify access to my Spotify account?
           </h2>
@@ -23,16 +23,30 @@ export default function HelpPage() {
             to authorise the app with your Spotify account in order to save your newly sorted
             playlists.
           </p>
-        </section>
+        </section> */}
 
         <section className="space-y-3">
           <h2 className="text-xl font-semibold">How do I use it?</h2>
           <ol className="list-inside list-decimal space-y-2 text-gray-700 dark:text-gray-300">
-            <li>Log in with your Spotify account.</li>
-            <li>Select a playlist you&apos;d like to sort.</li>
+            <li>
+              Copy the link of the playlist you want to sort. (Three dots &gt; Share &gt; Copy link
+              to playlist)
+            </li>
+            <li>Paste it in the input element on the homepage.</li>
             <li>Fine-tune your playlist by selecting the best color option for each track.</li>
-            <li>Save your new sorted playlist to Spotify.</li>
+            <li>
+              Save your newly sorted playlist through Hueify, then add it to your own Spotify
+              library.
+            </li>
           </ol>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-xl font-semibold">Why can&apos;t I sign in?</h2>
+          <p className="text-gray-700 dark:text-gray-300">
+            Hueify is currently in developer mode with limited access while in testing. If
+            you&apos;d like to try it, please reach out!
+          </p>
         </section>
 
         <section className="space-y-3">
