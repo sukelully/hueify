@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { geistSans, geistMono, corben } from '@/lib/fonts';
 import Header from '@/components/Header/Header';
+import { SourceLink } from '@/components/SourceLink';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -28,6 +29,7 @@ export default async function RootLayout({
       >
         <Header />
         {children}
+        <SourceLink />
       </body>
     </html>
   );

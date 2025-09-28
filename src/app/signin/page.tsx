@@ -12,9 +12,19 @@ export default async function SignIn() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center">
-      <div className="flex max-w-md flex-col items-center justify-center gap-3 text-center">
-        <p className="text-secondary-text">You&apos;re not signed in</p>
+      <div className="mt-14 flex max-w-md flex-col items-center justify-center gap-3 text-center">
         <SignInBtn isLogo />
+        <p className="text-secondary-text">
+          Hueify is currently in developer mode with limited access while in testing. If you&apos;d
+          like to try it, please contact{' '}
+          <a
+            href="mailto:luke@sukelully.dev"
+            className="text-blue-600 underline dark:text-blue-400"
+          >
+            luke@sukelully.dev
+          </a>
+          .
+        </p>
       </div>
     </div>
   );

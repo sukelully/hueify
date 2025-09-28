@@ -33,7 +33,7 @@ export default function Home() {
           Add a little{' '}
           <span className="relative font-bold">
             hue
-            <span className="absolute bottom-0 left-0 h-1 w-full rounded-full bg-gradient-to-r from-[#9a6dc7] via-[#6c8ec7] to-[#6dc7bb] dark:from-[#7a4da7] dark:via-[#4c6ea7] dark:to-[#4da79b]"></span>
+            <span className="runded-full absolute bottom-[2px] left-0 h-[2px] w-full bg-gradient-to-r from-[#9a6dc7] via-[#6c8ec7] to-[#6dc7bb] dark:from-[#7a4da7] dark:via-[#4c6ea7] dark:to-[#4da79b]"></span>
           </span>{' '}
           to your playlists.
         </p>
