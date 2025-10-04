@@ -130,7 +130,7 @@ export default function Header() {
         {session ? (
           <SignOutBtn onClick={closeMobileMenu} />
         ) : (
-          <SignInBtn onClick={closeMobileMenu} />
+          <PublicSignInBtn onClick={closeMobileMenu} />
         )}
 
         {/* Navigation in mobile menu */}
