@@ -116,7 +116,8 @@ export async function createPlaylist(playlistName: string) {
     },
     body: JSON.stringify({
       name: playlistName,
-      description: 'Sorted by color with Hueify.',
+      description:
+        'Now save this playlist to your library or add the songs to your own playlist :)',
     }),
   });
 
