@@ -1,8 +1,11 @@
-// import PlaylistClient from './SortedPlaylist';
 import Link from 'next/link';
-import { getPlaylist } from '@/lib/actions';
+// import { getPlaylist } from '@/lib/actions';
 import { PlaylistResponse } from '@/types/spotify/playlist';
+import { getHueifyPlaylist } from '@/lib/hueifyActions';
+import { getPlaylist } from '@/lib/actions';
 import PlaylistClient from './PlaylistClient';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
 
 type Params = {
   params: Promise<{ id: string }>;
@@ -10,23 +13,26 @@ type Params = {
 
 export default async function PlaylistPage({ params }: Params) {
   const { id } = await params;
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-  const playlist: PlaylistResponse = await getPlaylist(id);
+  const playlist: PlaylistResponse = session ? await getPlaylist(id) : await getHueifyPlaylist(id);
 
   return (
     <div className="relative flex h-screen flex-col items-center">
-      <DashboardChevron />
+      <DashboardChevron session={session} />
       <div className="w-full flex-1 overflow-hidden">
-        <PlaylistClient playlist={playlist} />
+        <PlaylistClient playlist={playlist} session={session} />
       </div>
     </div>
   );
 }
 
-function DashboardChevron() {
+function DashboardChevron({ session }: { session: any }) {
   return (
     <Link
-      href="/"
+      href={session ? '/dashboard' : '/'}
       className="hover:bg-white-active active:bg-white-active bg-background fixed top-18 left-4 z-10 cursor-pointer rounded-lg p-2 transition-colors duration-300 md:top-20 md:left-12"
     >
       <svg

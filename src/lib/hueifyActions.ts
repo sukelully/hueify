@@ -1,89 +1,146 @@
 'use server';
+import { TrackObject, EpisodeObject } from '@/types/spotify/playlist';
 
-import { getPlaylistTracks, createPlaylist, populatePlaylist } from '@/lib/actions';
-import chroma from 'chroma-js';
-
-// Main server action
-export async function createHueifyPlaylistFromLink(playlistUrl: string, playlistName: string) {
-  // Helper: extract playlist ID from a Spotify link
-  const extractPlaylistId = (url: string) => {
-    const match = url.match(/playlist\/([a-zA-Z0-9]+)(\?|$)/);
-    if (!match) throw new Error('Invalid Spotify playlist URL');
-    return match[1];
-  };
-
-  const playlistId = extractPlaylistId(playlistUrl);
-
-  // Fetch tracks from the original playlist
-  const tracks = await getPlaylistTracks(playlistId);
-  const uris = tracks.map((t) => t.uri);
-
-  // Create a new playlist under Hueify
-  const newPlaylistId = await createPlaylist(playlistName);
-
-  // Populate the new playlist
-  await populatePlaylist(newPlaylistId, uris);
-
-  return `https://open.spotify.com/playlist/${newPlaylistId}`;
-}
-
-type TrackWithColor = {
-  uri: string;
-  dominantColor: [number, number, number];
-};
-
-// Simple LCH color extraction helper
-const getLCH = (rgb: [number, number, number]) => {
-  try {
-    return chroma(rgb).lch() as [number, number, number];
-  } catch {
-    return [50, 0, 0];
-  }
-};
-
-// Example: simple dominant color placeholder
-const getDominantColor = (track: any) => {
-  const img = track.album?.images?.[1]?.url || track.images?.[1]?.url;
-  // For now you could return a placeholder RGB until you integrate ColorThief server-side or client-side
-  return [128, 128, 128] as [number, number, number];
-};
-
-export async function createHueifySortedPlaylist(originalPlaylistId: string, name: string) {
-  const tracks = await getPlaylistTracks(originalPlaylistId);
-  const tracksWithColor: TrackWithColor[] = tracks.map((t) => ({
-    uri: t.uri,
-    dominantColor: getDominantColor(t),
-  }));
-
-  // Sort by LCH hue
-  tracksWithColor.sort((a, b) => {
-    const [lA, cA, hA] = getLCH(a.dominantColor);
-    const [lB, cB, hB] = getLCH(b.dominantColor);
-
-    const hueA = isNaN(hA) || cA < 5 ? 360 : hA;
-    const hueB = isNaN(hB) || cB < 5 ? 360 : hB;
-
-    if (Math.abs(hueA - hueB) > 15) return hueA - hueB;
-    if (Math.abs(cA - cB) > 10) return cB - cA;
-    return lB - lA;
+async function getHueifyAccessToken(): Promise<string> {
+  const res = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Authorization:
+        'Basic ' +
+        Buffer.from(
+          process.env.SPOTIFY_CLIENT_ID + ':' + process.env.SPOTIFY_CLIENT_SECRET
+        ).toString('base64'),
+    },
+    body: new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: process.env.SPOTIFY_REFRESH_TOKEN!,
+    }),
   });
 
-  const uris = tracksWithColor.map((t) => t.uri);
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error('Failed to refresh Hueify access token: ' + text);
+  }
 
-  const newPlaylistId = await createPlaylist(name);
-  await populatePlaylist(newPlaylistId, uris);
-
-  return `https://open.spotify.com/playlist/${newPlaylistId}`;
+  const data = await res.json();
+  return data.access_token;
 }
 
-export async function createHueifyPlaylistFromUris(uris: string[], playlistName: string) {
-  if (!uris.length) throw new Error('No tracks to add');
+// Wrapper for fetch that handles Spotify rate limits (429)
+async function spotifyFetch(url: string, options: RequestInit, maxRetries = 3): Promise<Response> {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const res = await fetch(url, options);
 
-  // Create new Hueify playlist
-  const newPlaylistId = await createPlaylist(playlistName);
+    if (res.status === 429) {
+      const retryAfter = parseInt(res.headers.get('Retry-After') || '1', 10);
+      console.warn(`Rate limited (attempt ${attempt + 1}). Retrying after ${retryAfter}s...`);
+      await new Promise((r) => setTimeout(r, retryAfter * 1000));
+      continue;
+    }
 
-  // Populate playlist in chunks
-  await populatePlaylist(newPlaylistId, uris);
+    return res;
+  }
 
-  return `https://open.spotify.com/playlist/${newPlaylistId}`;
+  throw new Error(`Spotify API rate limit exceeded after ${maxRetries} retries`);
+}
+
+// Fetch playlist info
+export async function getHueifyPlaylist(playlistId: string) {
+  const accessToken = await getHueifyAccessToken();
+
+  const res = await spotifyFetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    next: { revalidate: 3600 },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error('Spotify fetch error:', text);
+    throw new Error(`Failed to fetch playlist ${playlistId}`);
+  }
+
+  return await res.json();
+}
+
+// Fetch all tracks from a playlist
+export async function getHueifyPlaylistTracks(playlistId: string, additional_types = 'track') {
+  const accessToken = await getHueifyAccessToken();
+  const allTracks: (TrackObject | EpisodeObject)[] = [];
+  let offset = 0;
+  const limit = 100;
+
+  while (true) {
+    const res = await spotifyFetch(
+      `https://api.spotify.com/v1/playlists/${playlistId}/tracks?offset=${offset}&limit=${limit}&additional_types=${additional_types}`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('Spotify fetch error:', text);
+      throw new Error(`Failed to fetch tracks for playlist ${playlistId}`);
+    }
+
+    const data = await res.json();
+    const items = data.items?.map((item: any) => item.track).filter(Boolean) || [];
+    allTracks.push(...items);
+
+    if (!data.next) break;
+    offset += limit;
+  }
+
+  return allTracks;
+}
+
+// Create a new public playlist
+export async function createHueifyPlaylist(playlistName: string) {
+  const accessToken = await getHueifyAccessToken();
+
+  const res = await spotifyFetch(`https://api.spotify.com/v1/me/playlists`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      name: playlistName,
+      description:
+        'Now save this playlist to your library or add the songs to your own playlist :)',
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error('Spotify create playlist error:', text);
+    throw new Error('Failed to create new playlist');
+  }
+
+  const data = await res.json();
+  return data.id;
+}
+
+// Add tracks to a playlist, handling code 429 per chunk
+export async function populateHueifyPlaylist(playlistId: string, uris: string[]) {
+  const CHUNK_SIZE = 100;
+  const accessToken = await getHueifyAccessToken();
+
+  for (let i = 0; i < uris.length; i += CHUNK_SIZE) {
+    const chunk = uris.slice(i, i + CHUNK_SIZE);
+
+    const res = await spotifyFetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ uris: chunk }),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('Spotify populate playlist error', text);
+      throw new Error('Failed to add tracks to playlist');
+    }
+  }
 }
