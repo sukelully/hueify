@@ -3,7 +3,6 @@
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { TrackObject, EpisodeObject } from '@/types/spotify/playlist';
-import { getHueifyAccessToken } from './hueifyAuth';
 
 // Wrapper for fetch that handles Spotify rate limits (429)
 async function spotifyFetch(url: string, options: RequestInit, maxRetries = 3): Promise<Response> {
@@ -37,7 +36,7 @@ export async function getAccessToken(): Promise<string> {
 
 // Fetch user's playlists
 export async function getUserPlaylists(offset = 0, limit = 20) {
-  const accessToken = await getHueifyAccessToken();
+  const accessToken = await getAccessToken();
 
   const res = await spotifyFetch(
     `https://api.spotify.com/v1/me/playlists?offset=${offset}&limit=${limit}`,
@@ -58,7 +57,7 @@ export async function getUserPlaylists(offset = 0, limit = 20) {
 
 // Fetch playlist info
 export async function getPlaylist(playlistId: string) {
-  const accessToken = await getHueifyAccessToken();
+  const accessToken = await getAccessToken();
 
   const res = await spotifyFetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
     headers: { Authorization: `Bearer ${accessToken}` },
@@ -76,7 +75,7 @@ export async function getPlaylist(playlistId: string) {
 
 // Fetch all tracks from a playlist
 export async function getPlaylistTracks(playlistId: string, additional_types = 'track') {
-  const accessToken = await getHueifyAccessToken();
+  const accessToken = await getAccessToken();
   const allTracks: (TrackObject | EpisodeObject)[] = [];
   let offset = 0;
   const limit = 100;
@@ -106,7 +105,7 @@ export async function getPlaylistTracks(playlistId: string, additional_types = '
 
 // Create a new public playlist
 export async function createPlaylist(playlistName: string) {
-  const accessToken = await getHueifyAccessToken();
+  const accessToken = await getAccessToken();
 
   const res = await spotifyFetch(`https://api.spotify.com/v1/me/playlists`, {
     method: 'POST',
@@ -134,7 +133,7 @@ export async function createPlaylist(playlistName: string) {
 // Add tracks to a playlist, handling code 429 per chunk
 export async function populatePlaylist(playlistId: string, uris: string[]) {
   const CHUNK_SIZE = 100;
-  const accessToken = await getHueifyAccessToken();
+  const accessToken = await getAccessToken();
 
   for (let i = 0; i < uris.length; i += CHUNK_SIZE) {
     const chunk = uris.slice(i, i + CHUNK_SIZE);

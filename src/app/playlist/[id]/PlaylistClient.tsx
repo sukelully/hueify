@@ -5,15 +5,20 @@ import { useRouter } from 'next/navigation';
 import NextImage from 'next/image';
 import { PlaylistResponse } from '@/types/spotify/playlist';
 import { createPlaylist, populatePlaylist } from '@/lib/actions';
+import { createHueifyPlaylist, populateHueifyPlaylist } from '@/lib/hueifyActions';
 import LoadingScreen from '@/components/LoadingScreen';
 import { useProcessedTracks } from '@/hooks/useProcessedTracks';
 
 type PlaylistClientProps = {
   playlist: PlaylistResponse;
+  session: any;
 };
 
-export default function PlaylistClient({ playlist }: PlaylistClientProps) {
-  const { processedTracks, isLoading, getArtworkUrl, getLCH } = useProcessedTracks(playlist.id);
+export default function PlaylistClient({ playlist, session }: PlaylistClientProps) {
+  const { processedTracks, isLoading, getArtworkUrl, getLCH } = useProcessedTracks(
+    playlist.id,
+    session
+  );
   const [manualColors, setManualColors] = useState<Record<string, [number, number, number]>>({});
   const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -24,8 +29,12 @@ export default function PlaylistClient({ playlist }: PlaylistClientProps) {
     setIsSaving(true);
     try {
       const playlistName = `${playlist.name} (Hueify)`;
-      const playlistId = await createPlaylist(playlistName);
-      await populatePlaylist(playlistId, sortedTrackUris);
+      const playlistId = session
+        ? await createPlaylist(playlistName)
+        : await createHueifyPlaylist(playlistName);
+      session
+        ? await populatePlaylist(playlistId, sortedTrackUris)
+        : await populateHueifyPlaylist(playlistId, sortedTrackUris);
 
       window.open(`https://open.spotify.com/playlist/${playlistId}`, '_blank');
       router.push('/');
