@@ -2,6 +2,7 @@ import Link from 'next/link';
 // import { getPlaylist } from '@/lib/actions';
 import { PlaylistResponse } from '@/types/spotify/playlist';
 import { getHueifyPlaylist } from '@/lib/hueifyActions';
+import { getPlaylist } from '@/lib/actions';
 import PlaylistClient from './PlaylistClient';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
@@ -16,8 +17,7 @@ export default async function PlaylistPage({ params }: Params) {
     headers: await headers(),
   });
 
-  // const playlist: PlaylistResponse = await getPlaylist(id);
-  const playlist: PlaylistResponse = await getHueifyPlaylist(id);
+  const playlist: PlaylistResponse = session ? await getPlaylist(id) : await getHueifyPlaylist(id);
 
   return (
     <div className="relative flex h-screen flex-col items-center">

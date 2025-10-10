@@ -45,8 +45,8 @@ export default function Home() {
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            className="flex-1 border-none bg-white px-4 py-3 text-gray-900 placeholder-gray-500 outline-none"
-            placeholder="Enter Spotify playlist link"
+            className="flex-1 border-none bg-white px-4 py-3 text-gray-900 placeholder-gray-500 outline-none sm:w-[300px]"
+            placeholder="Enter Spotify public playlist link"
           />
           <button
             onClick={extractPlaylistId}

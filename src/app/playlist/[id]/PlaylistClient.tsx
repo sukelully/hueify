@@ -37,7 +37,7 @@ export default function PlaylistClient({ playlist, session }: PlaylistClientProp
         : await populateHueifyPlaylist(playlistId, sortedTrackUris);
 
       window.open(`https://open.spotify.com/playlist/${playlistId}`, '_blank');
-      router.push('/');
+      session ? router.push('/dashboard') : router.push('/');
     } catch (error) {
       console.error('Failed to save playlist:', error);
     } finally {
