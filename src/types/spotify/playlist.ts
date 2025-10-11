@@ -103,7 +103,7 @@ interface AddedByObject {
   uri: string;
 }
 
-interface PlaylistTrackObject {
+export interface PlaylistTrackObject {
   added_at: string | null;
   added_by: AddedByObject | null;
   is_local: boolean;

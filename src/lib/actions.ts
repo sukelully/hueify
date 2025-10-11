@@ -1,7 +1,7 @@
 'use server';
 
 import { auth } from '@/lib/auth';
-import type { Session } from '@/lib/auth';
+import type { PlaylistTrackObject } from '@/types/spotify/playlist';
 import { headers } from 'next/headers';
 import { TrackObject, EpisodeObject } from '@/types/spotify/playlist';
 
@@ -126,7 +126,7 @@ export async function getPlaylistTracks(playlistId: string, additional_types = '
     }
 
     const data = await res.json();
-    const items = data.items?.map((item: any) => item.track).filter(Boolean) || [];
+    const items = data.items?.map((item: PlaylistTrackObject) => item.track).filter(Boolean) || [];
     allTracks.push(...items);
 
     if (!data.next) break;
@@ -139,6 +139,12 @@ export async function getPlaylistTracks(playlistId: string, additional_types = '
 // Create a new public playlist
 export async function createPlaylist(playlistName: string) {
   const accessToken = await getAccessToken();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  const description = session
+    ? "Feel free to change this description, but leave 'Hueify' somewhere in here to display which playlists have already been sorted on your dashboard :)"
+    : 'Now save this playlist to your library or add the songs to your own playlist :)';
 
   const res = await spotifyFetch(`https://api.spotify.com/v1/me/playlists`, {
     method: 'POST',
@@ -148,8 +154,7 @@ export async function createPlaylist(playlistName: string) {
     },
     body: JSON.stringify({
       name: playlistName,
-      description:
-        "Feel free to change the description, but leave 'Hueify' somewhere in here to display which playlists have already been sorted on your dashboard.",
+      description: description,
     }),
   });
 
