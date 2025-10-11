@@ -1,11 +1,10 @@
 import Link from 'next/link';
-// import { getPlaylist } from '@/lib/actions';
 import { PlaylistResponse } from '@/types/spotify/playlist';
-import { getHueifyPlaylist } from '@/lib/hueifyActions';
 import { getPlaylist } from '@/lib/actions';
 import PlaylistClient from './PlaylistClient';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
+import type { Session } from '@/lib/auth';
 
 type Params = {
   params: Promise<{ id: string }>;
@@ -17,7 +16,7 @@ export default async function PlaylistPage({ params }: Params) {
     headers: await headers(),
   });
 
-  const playlist: PlaylistResponse = session ? await getPlaylist(id) : await getHueifyPlaylist(id);
+  const playlist: PlaylistResponse = await getPlaylist(id);
 
   return (
     <div className="relative flex h-screen flex-col items-center">
@@ -29,7 +28,7 @@ export default async function PlaylistPage({ params }: Params) {
   );
 }
 
-function DashboardChevron({ session }: { session: any }) {
+function DashboardChevron({ session }: { session: Session | null }) {
   return (
     <Link
       href={session ? '/dashboard' : '/'}

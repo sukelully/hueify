@@ -1,6 +1,7 @@
 'use server';
 
 import { auth } from '@/lib/auth';
+import type { PlaylistTrackObject } from '@/types/spotify/playlist';
 import { headers } from 'next/headers';
 import { TrackObject, EpisodeObject } from '@/types/spotify/playlist';
 
@@ -22,16 +23,47 @@ async function spotifyFetch(url: string, options: RequestInit, maxRetries = 3): 
   throw new Error(`Spotify API rate limit exceeded after ${maxRetries} retries`);
 }
 
-// Get Spotify access token
-export async function getAccessToken(): Promise<string> {
-  const tokenResponse = await auth.api.getAccessToken({
-    body: { providerId: 'spotify' },
-    headers: await headers(),
+// Get user access token if signed in, otherwise use Hueify account token if not
+async function getAccessToken(): Promise<string> {
+  const hdrs = await headers();
+  const session = await auth.api.getSession({ headers: hdrs });
+
+  if (session) {
+    // User access token
+    const tokenResponse = await auth.api.getAccessToken({
+      body: { providerId: 'spotify' },
+      headers: hdrs,
+    });
+
+    const accessToken = tokenResponse?.accessToken;
+    if (!accessToken) throw new Error('No Spotify user access token available');
+    return accessToken;
+  }
+
+  // Hueify Spotify account access token
+  const res = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Authorization:
+        'Basic ' +
+        Buffer.from(
+          process.env.SPOTIFY_CLIENT_ID + ':' + process.env.SPOTIFY_CLIENT_SECRET
+        ).toString('base64'),
+    },
+    body: new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: process.env.SPOTIFY_REFRESH_TOKEN!,
+    }),
   });
 
-  const accessToken = tokenResponse?.accessToken;
-  if (!accessToken) throw new Error('No Spotify access token available');
-  return accessToken;
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error('Failed to refresh Hueify access token: ' + text);
+  }
+
+  const data = await res.json();
+  return data.access_token;
 }
 
 // Fetch user's playlists
@@ -76,6 +108,7 @@ export async function getPlaylist(playlistId: string) {
 // Fetch all tracks from a playlist
 export async function getPlaylistTracks(playlistId: string, additional_types = 'track') {
   const accessToken = await getAccessToken();
+
   const allTracks: (TrackObject | EpisodeObject)[] = [];
   let offset = 0;
   const limit = 100;
@@ -93,7 +126,7 @@ export async function getPlaylistTracks(playlistId: string, additional_types = '
     }
 
     const data = await res.json();
-    const items = data.items?.map((item: any) => item.track).filter(Boolean) || [];
+    const items = data.items?.map((item: PlaylistTrackObject) => item.track).filter(Boolean) || [];
     allTracks.push(...items);
 
     if (!data.next) break;
@@ -106,6 +139,12 @@ export async function getPlaylistTracks(playlistId: string, additional_types = '
 // Create a new public playlist
 export async function createPlaylist(playlistName: string) {
   const accessToken = await getAccessToken();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  const description = session
+    ? "Feel free to change this description, but leave 'Hueify' somewhere in here to display which playlists have already been sorted on your dashboard :)"
+    : 'Now save this playlist to your library or add the songs to your own playlist :)';
 
   const res = await spotifyFetch(`https://api.spotify.com/v1/me/playlists`, {
     method: 'POST',
@@ -115,8 +154,7 @@ export async function createPlaylist(playlistName: string) {
     },
     body: JSON.stringify({
       name: playlistName,
-      description:
-        "Feel free to change the description, but leave 'Hueify' somewhere in here to display which playlists have already been sorted on your dashboard.",
+      description: description,
     }),
   });
 

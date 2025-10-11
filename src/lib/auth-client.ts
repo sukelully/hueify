@@ -5,3 +5,5 @@ export const authClient = createAuthClient({
 });
 
 export const { signIn, signOut, linkSocial } = authClient;
+
+export type Session = typeof authClient.$Infer.Session;

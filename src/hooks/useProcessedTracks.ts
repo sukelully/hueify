@@ -5,7 +5,6 @@ import ColorThief from 'colorthief';
 import chroma from 'chroma-js';
 import { TrackObject, EpisodeObject } from '@/types/spotify/playlist';
 import { getPlaylistTracks } from '@/lib/actions';
-import { getHueifyPlaylistTracks } from '@/lib/hueifyActions';
 
 type ProcessedTrack = {
   track: TrackObject | EpisodeObject;
@@ -14,7 +13,7 @@ type ProcessedTrack = {
   lch: [number, number, number];
 };
 
-export function useProcessedTracks(playlistId: string, session: any) {
+export function useProcessedTracks(playlistId: string) {
   const [processedTracks, setProcessedTracks] = useState<ProcessedTrack[]>([]);
   const [progress, setProgress] = useState(0);
   const [totalTracks, setTotalTracks] = useState(0);
@@ -119,9 +118,7 @@ export function useProcessedTracks(playlistId: string, session: any) {
   useEffect(() => {
     const processColors = async () => {
       setIsLoading(true);
-      const tracks = session
-        ? await getPlaylistTracks(playlistId)
-        : await getHueifyPlaylistTracks(playlistId);
+      const tracks = await getPlaylistTracks(playlistId);
       setTotalTracks(tracks.length);
       if (tracks.length === 0) {
         setIsLoading(false);
