@@ -6,7 +6,7 @@ import NextImage from 'next/image';
 import { PlaylistResponse } from '@/types/spotify/playlist';
 import { createPlaylist, populatePlaylist } from '@/lib/actions';
 import LoadingScreen from '@/components/LoadingScreen';
-import { useProcessedTracks } from '@/hooks/useProcessedTracks';
+import { useProcessTracks } from '@/hooks/useProcessTracks';
 import type { Session } from '@/lib/auth';
 
 type PlaylistClientProps = {
@@ -15,7 +15,7 @@ type PlaylistClientProps = {
 };
 
 export default function PlaylistClient({ playlist, session }: PlaylistClientProps) {
-  const { processedTracks, isLoading, getArtworkUrl, getLCH } = useProcessedTracks(playlist.id);
+  const { processedTracks, isLoading, getArtworkUrl, getLCH } = useProcessTracks(playlist.id);
   const [manualColors, setManualColors] = useState<Record<string, [number, number, number]>>({});
   const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
