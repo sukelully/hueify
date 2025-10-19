@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import ColorThief from 'colorthief';
 import { TrackObject, EpisodeObject } from '@/types/spotify/playlist';
 import { getPlaylistTracks } from '@/lib/actions';
-import { getLCH, getArtworkUrl, processTracksInBatches } from '@/utils/colorProcessing';
+import { processTracksInBatches } from '@/utils/colorProcessing';
 
 type ProcessedTrack = {
   track: TrackObject | EpisodeObject;
@@ -21,13 +21,13 @@ export function useProcessTracks(playlistId: string) {
 
   useEffect(() => {
     const processColors = async () => {
-      setIsLoading(true);
       const tracks = await getPlaylistTracks(playlistId);
       setTotalTracks(tracks.length);
       if (tracks.length === 0) {
         setIsLoading(false);
         return;
       }
+
       try {
         const thief = new ColorThief();
         await processTracksInBatches(tracks, thief, setProgress, setProcessedTracks);
@@ -41,5 +41,5 @@ export function useProcessTracks(playlistId: string) {
     processColors();
   }, [playlistId]);
 
-  return { processedTracks, isLoading, progress, totalTracks, getArtworkUrl, getLCH };
+  return { processedTracks, isLoading, progress, totalTracks };
 }

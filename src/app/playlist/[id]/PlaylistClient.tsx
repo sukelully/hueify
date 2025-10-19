@@ -7,6 +7,7 @@ import { PlaylistResponse } from '@/types/spotify/playlist';
 import { createPlaylist, populatePlaylist } from '@/lib/actions';
 import LoadingScreen from '@/components/LoadingScreen';
 import { useProcessTracks } from '@/hooks/useProcessTracks';
+import { getLCH, getArtworkUrl } from '@/utils/colorProcessing';
 import type { Session } from '@/lib/auth';
 
 type PlaylistClientProps = {
@@ -15,7 +16,7 @@ type PlaylistClientProps = {
 };
 
 export default function PlaylistClient({ playlist, session }: PlaylistClientProps) {
-  const { processedTracks, isLoading, getArtworkUrl, getLCH } = useProcessTracks(playlist.id);
+  const { processedTracks, isLoading } = useProcessTracks(playlist.id);
   const [manualColors, setManualColors] = useState<Record<string, [number, number, number]>>({});
   const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
