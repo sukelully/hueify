@@ -2,16 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import ColorThief from 'colorthief';
-import { TrackObject, EpisodeObject } from '@/types/spotify/playlist';
 import { getPlaylistTracks } from '@/lib/actions';
 import { processTracksInBatches } from '@/utils/colorProcessing';
-
-type ProcessedTrack = {
-  track: TrackObject | EpisodeObject;
-  dominantColor: [number, number, number];
-  colorPalette: [number, number, number][];
-  lch: [number, number, number];
-};
+import type { ProcessedTrack } from '@/utils/colorProcessing';
 
 export function useProcessTracks(playlistId: string) {
   const [processedTracks, setProcessedTracks] = useState<ProcessedTrack[]>([]);

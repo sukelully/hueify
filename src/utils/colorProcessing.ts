@@ -2,7 +2,14 @@ import chroma from 'chroma-js';
 import ColorThief from 'colorthief';
 import { TrackObject, EpisodeObject } from '@/types/spotify/playlist';
 
-// Convert GB to LCH color format
+export type ProcessedTrack = {
+  track: TrackObject | EpisodeObject;
+  dominantColor: [number, number, number];
+  colorPalette: [number, number, number][];
+  lch: [number, number, number];
+};
+
+// Convert RGB to LCH color format
 export const getLCH = (rgb: [number, number, number]): [number, number, number] => {
   try {
     return chroma(rgb).lch() as [number, number, number];
@@ -82,7 +89,7 @@ export const processTracksInBatches = async (
   tracks: (TrackObject | EpisodeObject)[],
   thief: ColorThief,
   setProgress: (val: number) => void,
-  setProcessedTracks: (tracks: any[]) => void
+  setProcessedTracks: (tracks: ProcessedTrack[]) => void
 ) => {
   const BATCH_SIZE = 5;
   const results = [];
