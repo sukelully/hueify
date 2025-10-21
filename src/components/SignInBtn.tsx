@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { signIn } from '@/lib/auth-client';
 import Image from 'next/image';
 
-type SignInBtnProps = {
+export type SignInBtnProps = {
   isLogo?: boolean;
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 };

@@ -5,7 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { authClient } from '@/lib/auth-client';
 import PublicSignInBtn from '../PublicSignInBtn';
-import SignInBtn from '../SignInBtn';
 import SignOutBtn from '../SignOutBtn';
 
 export default function Header() {
