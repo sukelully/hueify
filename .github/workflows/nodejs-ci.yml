@@ -38,6 +38,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        env:
+            # This passes the secret to the environment of this step
+            DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Run ESLint
         run: pnpm run lint
